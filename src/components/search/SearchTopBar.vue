@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import type { ViewMode } from '../../types/search'
 
-defineProps<{
+const props = defineProps<{
   keyword: string
   viewMode: ViewMode
   summary: string[]
@@ -11,6 +12,18 @@ defineProps<{
   isLoading: boolean
   isRefreshing: boolean
 }>()
+
+const statusBadgeText = computed(() => {
+  if (props.hasPendingChanges) {
+    return '有待应用的筛选变更'
+  }
+
+  if (props.isRefreshing) {
+    return '正在按新条件查询'
+  }
+
+  return ''
+})
 
 const emit = defineEmits<{
   updateKeyword: [value: string]
@@ -77,8 +90,9 @@ const emit = defineEmits<{
 
       <div class="status-panel">
         <span class="meta-text">{{ totalCount > 0 ? `当前总结果数 ${totalCount}` : '应用条件后开始查询' }}</span>
-        <span v-if="hasPendingChanges" class="pending-pill">有待应用的筛选变更</span>
-        <span v-else-if="isRefreshing" class="pending-pill">正在按新条件查询</span>
+        <div class="status-pill-slot">
+          <span class="pending-pill" :class="{ 'pending-pill-hidden': !statusBadgeText }">{{ statusBadgeText || '占位状态文案' }}</span>
+        </div>
       </div>
     </div>
   </v-card>
@@ -93,9 +107,10 @@ const emit = defineEmits<{
 }
 
 .top-main {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 24px;
-  justify-content: space-between;
+  align-items: start;
 }
 
 .top-search {
@@ -164,25 +179,29 @@ const emit = defineEmits<{
 .top-actions {
   display: flex;
   align-items: start;
+  align-content: start;
   gap: 12px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   justify-content: end;
+  min-height: 2.75rem;
 }
 
 .top-meta {
   margin-top: 18px;
   padding-top: 18px;
   border-top: 1px solid rgba(130, 104, 76, 0.12);
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 16px;
-  justify-content: space-between;
-  align-items: center;
+  align-items: start;
 }
 
 .summary-chips {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
+  align-content: start;
+  min-height: 2rem;
 }
 
 .status-panel {
@@ -190,7 +209,7 @@ const emit = defineEmits<{
   gap: 12px;
   align-items: center;
   justify-content: end;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .meta-text {
@@ -198,12 +217,26 @@ const emit = defineEmits<{
   font-size: 0.92rem;
 }
 
+.status-pill-slot {
+  display: flex;
+  justify-content: flex-end;
+  min-width: 12.5rem;
+  min-height: 2rem;
+}
+
 .pending-pill {
+  display: inline-flex;
+  align-items: center;
   padding: 6px 12px;
   border-radius: 999px;
   background: rgba(191, 125, 69, 0.16);
   color: #8e4b2a;
   font-size: 0.88rem;
+  white-space: nowrap;
+}
+
+.pending-pill-hidden {
+  visibility: hidden;
 }
 
 .mobile-filters {
@@ -221,9 +254,30 @@ const emit = defineEmits<{
     align-items: stretch;
   }
 
+  .top-main {
+    display: flex;
+  }
+
+  .top-meta {
+    display: flex;
+  }
+
   .top-actions,
   .status-panel {
     justify-content: start;
+  }
+
+  .top-actions {
+    flex-wrap: wrap;
+    min-height: 0;
+  }
+
+  .status-panel {
+    flex-wrap: wrap;
+  }
+
+  .status-pill-slot {
+    min-width: 0;
   }
 
   .mobile-filters {

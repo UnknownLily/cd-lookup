@@ -61,7 +61,7 @@ function draftValues(key: ListFilterKey): string[] {
         <v-expansion-panel-text>
           <div class="group-content">
             <template v-for="filter in group.filters" :key="filter.key">
-              <div v-if="isRangeFilter(filter)" class="filter-block">
+              <div v-if="isRangeFilter(filter)" class="filter-block filter-block-range">
                 <div class="filter-head">
                   <div>
                     <h3>{{ filter.label }}</h3>
@@ -69,6 +69,7 @@ function draftValues(key: ListFilterKey): string[] {
                   </div>
                 </div>
                 <v-range-slider
+                  class="range-slider"
                   :model-value="draftCriteria[filter.key]"
                   :min="filter.min"
                   :max="filter.max"
@@ -207,6 +208,10 @@ function draftValues(key: ListFilterKey): string[] {
   gap: 12px;
 }
 
+.filter-block-range {
+  gap: 18px;
+}
+
 .filter-head h3 {
   margin: 0;
   font-size: 1rem;
@@ -223,6 +228,10 @@ function draftValues(key: ListFilterKey): string[] {
   text-align: center;
   color: rgba(31, 45, 51, 0.56);
   font-size: 0.9rem;
+}
+
+.range-slider {
+  padding-top: 18px;
 }
 
 :deep(.selected-chip) {

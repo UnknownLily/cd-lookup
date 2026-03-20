@@ -197,7 +197,7 @@ watch(
   max-height: calc(100vh - 48px);
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 12px 14px 18px 12px;
+  padding: 0 14px 18px 12px;
   scrollbar-gutter: stable;
 }
 
