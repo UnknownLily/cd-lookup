@@ -9,7 +9,7 @@ import {
   type SearchCriteriaDraft,
 } from '../types/search'
 
-const API_BASE = 'https://thwiki.cc/rest/asktrack/v0'
+const API_BASE = import.meta.env.DEV ? '/api/asktrack/v0' : 'https://thwiki.cc/rest/asktrack/v0'
 const EXTRA_CRITERIA: ApiCriteriaPayload = {
   name: [],
   alname: null,
@@ -19,6 +19,10 @@ const EXTRA_CRITERIA: ApiCriteriaPayload = {
 }
 
 function buildApiUrl(endpoint: string): string {
+  if (import.meta.env.DEV) {
+    return `${API_BASE}${endpoint}`
+  }
+
   const origin = encodeURIComponent(window.location.origin).replace(/\./g, '%2E')
   const divider = endpoint.includes('?') ? '&' : '?'
   return `${API_BASE}${endpoint}${divider}origin=${origin}`
@@ -92,6 +96,10 @@ export async function fetchSearchPage(
     method: 'POST',
     body: JSON.stringify(payload),
     signal: options.signal,
+    headers: {
+      Accept: 'application/json,text/plain,*/*',
+      'Content-Type': 'text/plain;charset=UTF-8',
+    },
   })
 
   if (!response.ok) {

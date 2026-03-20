@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import SearchTagInput from './SearchTagInput.vue'
 import { FILTER_GROUPS, isListFilter, isRangeFilter } from '../../config/filters'
 import { FIELD_LABELS, type ListFilterKey, type RangeFilterKey, type SearchCriteriaDraft } from '../../types/search'
 
@@ -81,13 +82,13 @@ function updateCombobox(key: ListFilterKey, value: unknown): void {
                   </div>
                 </div>
 
-                <v-combobox
+                <SearchTagInput
                   v-if="filter.type === 'taglist'"
                   :label="FIELD_LABELS[filter.key] ?? filter.label"
                   :items="filter.items"
                   :model-value="draftCriteria[filter.key]"
-                  multiple
-                  clearable
+                  :hint="filter.hint"
+                  :suggestion-source="filter.suggestionSource"
                   @update:model-value="updateCombobox(filter.key, $event)"
                 />
 

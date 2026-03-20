@@ -15,6 +15,7 @@ export interface ListFilterDefinition {
   type: 'checklist' | 'taglist'
   items: string[]
   hint?: string
+  suggestionSource?: string
 }
 
 export type FilterDefinition = RangeFilterDefinition | ListFilterDefinition
@@ -48,14 +49,15 @@ export const FILTER_GROUPS: FilterGroup[] = [
     title: '发售与制作',
     description: '这组字段通常最能直接锁定结果。',
     filters: [
-      { key: 'event', label: '发售展会', type: 'taglist', items: [], hint: '支持输入搜索并手动添加标签。' },
-      { key: 'circle', label: '制作方', type: 'taglist', items: [], hint: '可直接输入社团或制作方名称。' },
+      { key: 'event', label: '发售展会', type: 'taglist', items: [], hint: '支持输入搜索并手动添加标签。', suggestionSource: '发售展会建议' },
+      { key: 'circle', label: '制作方', type: 'taglist', items: [], hint: '可直接输入社团或制作方名称。', suggestionSource: '制作方建议' },
       {
         key: 'coverchar',
         label: '封面角色',
         type: 'taglist',
         items: ['博丽灵梦', '雾雨魔理沙'],
         hint: '示例标签来自 demo，可继续手动输入。',
+        suggestionSource: '封面角色建议',
       },
     ],
   },

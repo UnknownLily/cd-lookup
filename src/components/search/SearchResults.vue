@@ -34,7 +34,7 @@ function setupObserver(): void {
     if (first?.isIntersecting && props.more && !props.isLoadingMore && props.status !== 'loading') {
       emit('loadMore')
     }
-  }, { rootMargin: '400px 0px 400px 0px' })
+  })
 
   observer.observe(sentinel.value)
 }
@@ -83,13 +83,37 @@ onBeforeUnmount(() => {
     </div>
 
     <template v-else>
-      <div v-if="isInitialLoading" :class="viewMode === 'card' ? 'results-grid' : 'results-list'">
-        <v-skeleton-loader
-          v-for="index in 8"
-          :key="index"
-          :type="viewMode === 'card' ? 'image, article, actions' : 'list-item-three-line, image'"
-          class="skeleton-item"
-        />
+      <div v-if="isInitialLoading && viewMode === 'card'" class="results-grid">
+        <div v-for="index in 8" :key="`card-skeleton-${index}`" class="card-skeleton">
+          <div class="skeleton-cover" />
+          <div class="skeleton-body">
+            <div class="skeleton-line skeleton-line-title" />
+            <div class="skeleton-line" />
+            <div class="skeleton-line skeleton-line-short" />
+            <div class="skeleton-line skeleton-line-medium" />
+            <div class="skeleton-actions">
+              <div class="skeleton-pill" />
+              <div class="skeleton-pill" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div v-else-if="isInitialLoading" class="results-list">
+        <div v-for="index in 8" :key="`list-skeleton-${index}`" class="list-skeleton">
+          <div class="list-skeleton-cover" />
+          <div class="list-skeleton-body">
+            <div class="skeleton-line skeleton-line-title" />
+            <div class="skeleton-line" />
+            <div class="skeleton-line skeleton-line-medium" />
+            <div class="skeleton-line skeleton-line-short" />
+            <div class="skeleton-tags">
+              <div class="skeleton-pill" />
+              <div class="skeleton-pill" />
+              <div class="skeleton-pill skeleton-pill-short" />
+            </div>
+          </div>
+        </div>
       </div>
 
       <div v-else-if="viewMode === 'card'" class="results-grid">
@@ -185,8 +209,85 @@ onBeforeUnmount(() => {
   margin: 0;
 }
 
-.skeleton-item {
+.card-skeleton,
+.list-skeleton {
   border-radius: 28px;
+  overflow: hidden;
+  border: 1px solid rgba(130, 104, 76, 0.1);
+  background: rgba(255, 250, 244, 0.92);
+  box-shadow: 0 18px 36px rgba(56, 44, 34, 0.05);
+}
+
+.card-skeleton {
+  display: grid;
+}
+
+.list-skeleton {
+  display: grid;
+  grid-template-columns: 188px minmax(0, 1fr);
+}
+
+.skeleton-cover,
+.list-skeleton-cover,
+.skeleton-line,
+.skeleton-pill {
+  background: linear-gradient(90deg, rgba(219, 213, 205, 0.62), rgba(244, 240, 235, 0.95), rgba(219, 213, 205, 0.62));
+  background-size: 240% 100%;
+  animation: shimmer 1.4s infinite;
+}
+
+.skeleton-cover {
+  height: 196px;
+}
+
+.list-skeleton-cover {
+  min-height: 160px;
+}
+
+.skeleton-body,
+.list-skeleton-body {
+  display: grid;
+  gap: 12px;
+  padding: 20px;
+}
+
+.skeleton-line {
+  height: 14px;
+  border-radius: 999px;
+}
+
+.skeleton-line-title {
+  height: 28px;
+  width: 92%;
+}
+
+.skeleton-line-short {
+  width: 52%;
+}
+
+.skeleton-line-medium {
+  width: 78%;
+}
+
+.skeleton-actions,
+.skeleton-tags {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.skeleton-actions {
+  justify-content: end;
+}
+
+.skeleton-pill {
+  width: 84px;
+  height: 40px;
+  border-radius: 14px;
+}
+
+.skeleton-pill-short {
+  width: 64px;
 }
 
 .sentinel {
@@ -206,6 +307,24 @@ onBeforeUnmount(() => {
   .results-head {
     flex-direction: column;
     align-items: start;
+  }
+
+  .list-skeleton {
+    grid-template-columns: 1fr;
+  }
+
+  .list-skeleton-cover {
+    min-height: 180px;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+
+  100% {
+    background-position: -100% 0;
   }
 }
 </style>
