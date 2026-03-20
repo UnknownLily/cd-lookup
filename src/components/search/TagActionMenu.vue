@@ -45,7 +45,7 @@ function setAsFilter(): void {
       </v-chip>
     </template>
 
-    <v-list min-width="220" density="compact" rounded="xl">
+    <v-list class="tag-menu-list" min-width="220" density="compact" rounded="xl">
       <v-list-subheader>{{ tag.label }}</v-list-subheader>
       <v-list-item prepend-icon="mdi-content-copy" title="复制文本" @click="copyValue" />
       <v-list-item
@@ -69,5 +69,13 @@ function setAsFilter(): void {
 <style scoped>
 .tag-chip {
   cursor: pointer;
+}
+
+.tag-menu-list {
+  border-radius: var(--search-menu-radius) !important;
+}
+
+.tag-menu-list :deep(.v-list-item) {
+  border-radius: 14px;
 }
 </style>

@@ -32,6 +32,8 @@ const emit = defineEmits<{
         </div>
 
         <v-text-field
+          class="keyword-input"
+          rounded="xl"
           :model-value="keyword"
           label="关键词"
           placeholder="输入标题、社团或你想找的线索"
@@ -43,11 +45,12 @@ const emit = defineEmits<{
       </div>
 
       <div class="top-actions">
-        <v-btn class="mobile-filters" variant="outlined" prepend-icon="mdi-tune-variant" @click="emit('openFilters')">
+        <v-btn class="mobile-filters top-action-btn" variant="outlined" prepend-icon="mdi-tune-variant" @click="emit('openFilters')">
           筛选
         </v-btn>
 
         <v-btn-toggle
+          class="view-toggle"
           mandatory
           divided
           :model-value="viewMode"
@@ -57,10 +60,10 @@ const emit = defineEmits<{
           <v-btn value="list" icon="mdi-format-list-bulleted" aria-label="列表布局" />
         </v-btn-toggle>
 
-        <v-btn color="primary" :loading="isLoading" :disabled="!canSearch" @click="emit('apply')">
+        <v-btn class="top-action-btn" color="primary" :loading="isLoading" :disabled="!canSearch" @click="emit('apply')">
           应用筛选
         </v-btn>
-        <v-btn variant="text" @click="emit('clear')">清空</v-btn>
+        <v-btn class="top-action-btn" variant="text" @click="emit('clear')">清空</v-btn>
       </div>
     </div>
 
@@ -99,6 +102,39 @@ const emit = defineEmits<{
   display: grid;
   gap: 18px;
   flex: 1;
+}
+
+.keyword-input :deep(.v-field) {
+  border-radius: var(--search-input-radius);
+}
+
+.keyword-input :deep(.v-field__outline) {
+  --v-field-border-radius: var(--search-input-radius);
+}
+
+.keyword-input :deep(.v-field__input) {
+  min-height: 56px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.top-action-btn,
+.view-toggle {
+  border-radius: var(--search-control-radius);
+}
+
+.top-action-btn :deep(.v-btn__overlay),
+.top-action-btn :deep(.v-btn__underlay) {
+  border-radius: inherit;
+}
+
+.view-toggle :deep(.v-btn) {
+  border-radius: var(--search-control-radius);
+}
+
+.view-toggle :deep(.v-btn__overlay),
+.view-toggle :deep(.v-btn__underlay) {
+  border-radius: inherit;
 }
 
 .intro-copy h1 {

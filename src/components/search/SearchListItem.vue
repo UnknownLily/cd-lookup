@@ -43,6 +43,7 @@ const emit = defineEmits<{
           </div>
 
           <v-btn
+            class="result-action-btn"
             color="primary"
             variant="tonal"
             append-icon="mdi-open-in-new"
@@ -70,6 +71,7 @@ const emit = defineEmits<{
 
         <div v-if="item.links.length > 0" class="list-links">
           <v-btn
+            class="result-link-btn"
             v-for="link in item.links.slice(0, 2)"
             :key="link.key"
             size="small"
@@ -110,6 +112,11 @@ const emit = defineEmits<{
   overflow: hidden;
   border: 1px solid rgba(130, 104, 76, 0.12);
   background: rgba(255, 250, 244, 0.98);
+}
+
+.result-action-btn,
+.result-link-btn {
+  border-radius: var(--search-control-radius);
 }
 
 .list-cover {

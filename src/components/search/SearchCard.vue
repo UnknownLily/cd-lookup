@@ -37,6 +37,7 @@ const emit = defineEmits<{
 
           <div class="card-actions">
             <v-btn
+              class="result-action-btn"
               color="primary"
               append-icon="mdi-open-in-new"
               :href="item.wikiUrl"
@@ -66,6 +67,7 @@ const emit = defineEmits<{
             <div class="detail-label">外部链接</div>
             <div class="link-row">
               <v-btn
+                class="result-link-btn"
                 v-for="link in item.links.slice(0, 2)"
                 :key="link.key"
                 size="small"
@@ -105,6 +107,11 @@ const emit = defineEmits<{
   background: linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(248, 242, 232, 0.96));
   border: 1px solid rgba(130, 104, 76, 0.12);
   box-shadow: 0 24px 48px rgba(61, 49, 39, 0.08);
+}
+
+.result-action-btn,
+.result-link-btn {
+  border-radius: var(--search-control-radius);
 }
 
 .card-cover {

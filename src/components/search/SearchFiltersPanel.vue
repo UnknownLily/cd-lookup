@@ -26,6 +26,19 @@ function updateCombobox(key: ListFilterKey, value: unknown): void {
 
   emit('updateList', key, value.map((item) => String(item)))
 }
+
+function toggleChipValue(key: ListFilterKey, option: string): void {
+  const currentValues = draftValues(key)
+  const nextValues = currentValues.includes(option)
+    ? currentValues.filter((value) => value !== option)
+    : [...currentValues, option]
+
+  emit('updateList', key, nextValues)
+}
+
+function draftValues(key: ListFilterKey): string[] {
+  return props.draftCriteria[key]
+}
 </script>
 
 <template>
@@ -37,8 +50,8 @@ function updateCombobox(key: ListFilterKey, value: unknown): void {
       </div>
     </div>
 
-    <v-expansion-panels multiple variant="accordion">
-      <v-expansion-panel v-for="group in FILTER_GROUPS" :key="group.id" elevation="0">
+    <v-expansion-panels multiple variant="accordion" class="filters-accordion">
+      <v-expansion-panel v-for="group in FILTER_GROUPS" :key="group.id" elevation="0" rounded="xl">
         <v-expansion-panel-title>
           <div>
             <div class="group-title">{{ group.title }}</div>
@@ -92,23 +105,21 @@ function updateCombobox(key: ListFilterKey, value: unknown): void {
                   @update:model-value="updateCombobox(filter.key, $event)"
                 />
 
-                <v-chip-group
+                <div
                   v-else
-                  :model-value="draftCriteria[filter.key]"
-                  multiple
-                  selected-class="selected-chip"
-                  @update:model-value="updateCombobox(filter.key, $event)"
+                  class="filter-chip-group"
                 >
                   <v-chip
                     v-for="option in filter.items"
                     :key="option"
-                    :value="option"
+                    :class="{ 'selected-chip': draftValues(filter.key).includes(option) }"
                     filter
                     variant="outlined"
+                    @click="toggleChipValue(filter.key, option)"
                   >
                     {{ option }}
                   </v-chip>
-                </v-chip-group>
+                </div>
               </div>
             </template>
           </div>
@@ -122,6 +133,47 @@ function updateCombobox(key: ListFilterKey, value: unknown): void {
 .filters-panel {
   display: grid;
   gap: 16px;
+}
+
+:deep(.v-expansion-panels) {
+  display: grid;
+  gap: 14px;
+}
+
+:deep(.v-expansion-panel) {
+  overflow: hidden;
+  border: 1px solid rgba(130, 104, 76, 0.12);
+  background: rgba(255, 250, 244, 0.88);
+  box-shadow: 0 16px 30px rgba(61, 49, 39, 0.05);
+  border-radius: 28px !important;
+}
+
+:deep(.v-expansion-panel__shadow),
+:deep(.v-expansion-panel__bg) {
+  border-radius: 28px !important;
+}
+
+:deep(.v-expansion-panel-title) {
+  padding: 18px 20px;
+  min-height: 112px;
+  align-items: center;
+}
+
+:deep(.v-expansion-panel-title__overlay) {
+  border-radius: 28px;
+}
+
+:deep(.v-expansion-panel-title__icon) {
+  align-self: center;
+  margin-top: 0;
+}
+
+:deep(.v-expansion-panel-title__icon .v-icon) {
+  font-size: 1.5rem;
+}
+
+:deep(.v-expansion-panel-text__wrapper) {
+  padding: 0 20px 20px;
 }
 
 .filters-head h2 {
@@ -177,5 +229,18 @@ function updateCombobox(key: ListFilterKey, value: unknown): void {
   background: rgba(142, 75, 42, 0.14);
   color: #8e4b2a;
   border-color: rgba(142, 75, 42, 0.28);
+}
+
+.filter-chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.filter-chip-group :deep(.v-chip) {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  max-width: 100%;
 }
 </style>

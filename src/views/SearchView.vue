@@ -146,7 +146,7 @@ watch(
         </div>
       </div>
 
-      <v-navigation-drawer v-model="mobileFiltersOpen" temporary location="left" width="360" class="mobile-only">
+      <v-navigation-drawer v-model="mobileFiltersOpen" temporary location="left" width="360" class="mobile-only mobile-filters-drawer">
         <div class="drawer-inner">
           <SearchFiltersPanel
             :draft-criteria="store.draftCriteria"
@@ -154,8 +154,8 @@ watch(
             @update-list="handleListUpdate"
           />
           <div class="drawer-actions">
-            <v-btn variant="text" @click="mobileFiltersOpen = false">关闭</v-btn>
-            <v-btn color="primary" :loading="store.status === 'loading'" @click="applyFilters">应用筛选</v-btn>
+            <v-btn class="drawer-action-btn" variant="text" @click="mobileFiltersOpen = false">关闭</v-btn>
+            <v-btn class="drawer-action-btn" color="primary" :loading="store.status === 'loading'" @click="applyFilters">应用筛选</v-btn>
           </div>
         </div>
       </v-navigation-drawer>
@@ -188,15 +188,39 @@ watch(
   grid-template-columns: minmax(300px, 360px) minmax(0, 1fr);
   gap: 24px;
   align-items: start;
+  min-height: 0;
 }
 
 .sidebar {
   position: sticky;
   top: 24px;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 12px 14px 18px 12px;
+  scrollbar-gutter: stable;
 }
 
 .content-column {
   min-width: 0;
+}
+
+.sidebar::-webkit-scrollbar {
+  width: 10px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: rgba(130, 104, 76, 0.08);
+  border-radius: 999px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: rgba(130, 104, 76, 0.28);
+  border-radius: 999px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(130, 104, 76, 0.4);
 }
 
 .drawer-inner {
@@ -211,6 +235,20 @@ watch(
   display: flex;
   justify-content: space-between;
   gap: 12px;
+}
+
+.drawer-action-btn {
+  border-radius: var(--search-control-radius);
+}
+
+.drawer-action-btn :deep(.v-btn__overlay),
+.drawer-action-btn :deep(.v-btn__underlay) {
+  border-radius: inherit;
+}
+
+.mobile-filters-drawer :deep(.v-navigation-drawer__content) {
+  border-top-right-radius: 28px;
+  border-bottom-right-radius: 28px;
 }
 
 .mobile-only {
@@ -228,6 +266,12 @@ watch(
 
   .desktop-only {
     display: none;
+  }
+
+  .sidebar {
+    max-height: none;
+    overflow: visible;
+    padding: 0;
   }
 
   .mobile-only {

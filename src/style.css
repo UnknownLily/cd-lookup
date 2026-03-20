@@ -2,6 +2,9 @@
   font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
   line-height: 1.5;
   font-weight: 400;
+  --search-input-radius: 24px;
+  --search-control-radius: 18px;
+  --search-menu-radius: 20px;
   color: #1e2930;
   background:
     radial-gradient(circle at top left, rgba(212, 169, 117, 0.18), transparent 34%),

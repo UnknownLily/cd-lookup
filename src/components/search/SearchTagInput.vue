@@ -128,6 +128,8 @@ onBeforeUnmount(() => {
 
 <template>
   <v-combobox
+    class="tag-input"
+    rounded="xl"
     :label="label"
     :hint="statusMessage"
     persistent-hint
@@ -140,6 +142,7 @@ onBeforeUnmount(() => {
     chips
     closable-chips
     hide-selected
+    hide-no-data
     no-filter
     menu-icon="mdi-magnify"
     @update:search="search = String($event ?? '')"
@@ -158,6 +161,10 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
+.tag-input {
+  width: 100%;
+}
+
 .search-tip {
   padding: 12px 16px 10px;
   border-bottom: 1px solid rgba(130, 104, 76, 0.12);
@@ -192,5 +199,44 @@ onBeforeUnmount(() => {
   margin-top: 4px;
   font-size: 0.82rem;
   color: rgba(31, 45, 51, 0.58);
+}
+
+:deep(.v-field) {
+  border-radius: var(--search-input-radius);
+}
+
+:deep(.v-field__outline) {
+  --v-field-border-radius: var(--search-input-radius);
+}
+
+:deep(.v-field__input) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  align-content: flex-start;
+  gap: 8px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  overflow-x: visible;
+  overflow-y: visible;
+  min-height: 56px;
+}
+
+:deep(.v-combobox__selection) {
+  flex: 0 0 auto;
+  max-width: 100%;
+  margin-inline-end: 0;
+}
+
+:deep(.v-chip) {
+  flex: 0 0 auto;
+  max-width: 100%;
+  white-space: nowrap;
+}
+
+:deep(.v-field__append-inner),
+:deep(.v-field__clearable) {
+  align-self: center;
+  padding-top: 0;
 }
 </style>
