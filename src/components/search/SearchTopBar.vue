@@ -200,8 +200,8 @@ const emit = defineEmits<{
           <v-card class="keyword-menu" rounded="xl" variant="flat">
             <div class="keyword-tip">
               <div class="keyword-tip-head">
-                <div class="keyword-tip-title">自动归类建议</div>
-                <span class="keyword-tip-badge">单次正式查询</span>
+                <div class="keyword-tip-title">自动补全建议/消歧义</div>
+                <span class="keyword-tip-badge">自动补全</span>
               </div>
               <div class="keyword-tip-text">下拉项会显示这个词会被归入哪个筛选字段，确认后再应用即可。</div>
             </div>
@@ -271,9 +271,7 @@ const emit = defineEmits<{
   --top-primary-pill-fg: rgb(var(--v-theme-primary));
   --top-primary-pill-border: rgba(var(--v-theme-primary), 0.22);
   --top-primary-pill-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.34), 0 8px 18px rgba(92, 52, 68, 0.08);
-  background:
-    radial-gradient(circle at top right, rgba(var(--v-theme-primary), 0.035), transparent 32%),
-    linear-gradient(180deg, rgb(255, 253, 254) 0%, rgb(252, 248, 251) 100%) !important;
+  background: linear-gradient(180deg, var(--surface-panel-strong), var(--surface-panel-soft));
   border: 1px solid var(--theme-border-soft);
   box-shadow: var(--shadow-elevated);
   padding: 24px;
@@ -294,17 +292,6 @@ const emit = defineEmits<{
 
 .keyword-input :deep(.v-field) {
   border-radius: var(--search-input-radius);
-  background: linear-gradient(180deg, rgb(255, 253, 254) 0%, rgb(252, 248, 251) 100%) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.72),
-    0 8px 18px rgba(92, 52, 68, 0.06);
-}
-
-.keyword-input :deep(.v-field__field),
-.keyword-input :deep(.v-field__input),
-.keyword-input :deep(.v-field__prepend-inner),
-.keyword-input :deep(.v-field__append-inner) {
-  background: transparent !important;
 }
 
 .keyword-input :deep(.v-field__outline) {
@@ -354,8 +341,11 @@ const emit = defineEmits<{
 
 .keyword-menu {
   width: min(720px, calc(100vw - 48px));
-  border: 1px solid var(--theme-border-soft);
-  box-shadow: 0 20px 40px rgba(56, 44, 34, 0.12);
+  border: 1px solid rgba(var(--v-theme-primary), 0.12);
+  box-shadow:
+    0 14px 28px rgba(56, 44, 34, 0.08),
+    0 24px 44px rgba(56, 44, 34, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.58);
   overflow: hidden;
   background: linear-gradient(180deg, rgb(255, 253, 254) 0%, rgb(252, 248, 251) 100%) !important;
 }
@@ -367,7 +357,7 @@ const emit = defineEmits<{
 
 .keyword-tip {
   padding: 12px 16px 10px;
-  border-bottom: 1px solid var(--theme-border-soft);
+  border-bottom: 1px solid rgba(var(--v-theme-primary), 0.1);
   background: transparent !important;
 }
 
