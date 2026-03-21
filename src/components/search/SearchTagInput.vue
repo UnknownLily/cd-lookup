@@ -151,7 +151,7 @@ onBeforeUnmount(() => {
     <template #prepend-item>
       <div class="search-tip">
         <div class="search-tip-head">
-          <div class="search-tip-title">高数量标签搜索</div>
+          <div class="search-tip-title">标签搜索</div>
           <span v-if="sourceBadge" class="source-badge">{{ sourceBadge }}</span>
         </div>
         <div class="search-tip-text">输入关键字后会优先做本地筛选，并在可用时拉取远程建议。</div>

@@ -46,7 +46,7 @@ function draftValues(key: ListFilterKey): string[] {
     <div class="filters-head">
       <div>
         <h2>筛选面板</h2>
-        <p>先调整条件，再统一应用，减少慢接口重复请求。</p>
+        <p>调整条件后点击“应用筛选”按钮</p>
       </div>
     </div>
 

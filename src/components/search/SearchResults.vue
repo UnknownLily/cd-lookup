@@ -60,7 +60,7 @@ onBeforeUnmount(() => {
     <header class="results-head">
       <div class="results-title-block">
         <h2>结果展示</h2>
-        <p>默认卡片布局，支持切换到高密度列表布局。</p>
+        <p>默认以卡片布局显示，支持切换为列表布局。</p>
       </div>
       <div class="results-toolbar">
         <div class="results-count">{{ totalCount > 0 ? `已返回 ${results.length} / ${totalCount}` : '等待查询' }}</div>

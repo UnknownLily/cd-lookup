@@ -36,8 +36,8 @@ function formatDuration(value: number): string {
 export const FILTER_GROUPS: FilterGroup[] = [
   {
     id: 'timeline',
-    title: '时间与范围',
-    description: '用范围控件缩小候选结果，避免慢接口返回过多数据。',
+    title: '时间与时长',
+    description: '成立年份、发行年份、时长',
     filters: [
       { key: 'establish', label: '成立年份', type: 'range', min: 2000, max: 2032 },
       { key: 'year', label: '发行年份', type: 'range', min: 2000, max: 2032 },
@@ -47,7 +47,7 @@ export const FILTER_GROUPS: FilterGroup[] = [
   {
     id: 'publishing',
     title: '发售与制作',
-    description: '这组字段通常最能直接锁定结果。',
+    description: '发售展会、制作方、封面角色',
     filters: [
       { key: 'event', label: '发售展会', type: 'taglist', items: [], hint: '支持输入搜索并手动添加标签。', suggestionSource: '发售展会建议' },
       { key: 'circle', label: '制作方', type: 'taglist', items: [], hint: '可直接输入社团或制作方名称。', suggestionSource: '制作方建议' },
@@ -64,7 +64,7 @@ export const FILTER_GROUPS: FilterGroup[] = [
   {
     id: 'taxonomy',
     title: '分类属性',
-    description: '这些字段更适合用来快速排除大批结果。',
+    description: '地区、作品类型、社团状态、属性、分级',
     filters: [
       { key: 'region', label: '地区', type: 'checklist', items: ['日本', '中国', '台湾', '香港', '韩国', '美国', '英国', '德国', '加拿大'] },
       { key: 'work', label: '作品类型', type: 'checklist', items: ['同人音乐', '同人游戏', '同人志', '同人动画', '周边', '其他'] },
