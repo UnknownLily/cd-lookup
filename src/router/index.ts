@@ -1,12 +1,9 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import type { RouteRecordRaw } from 'vue-router'
 
-export const router = createRouter({
-  history: createWebHistory(),
-  routes: [
-    {
-      path: '/',
-      name: 'search',
-      component: () => import('../views/SearchView.vue'),
-    },
-  ],
-})
+export const routes: RouteRecordRaw[] = [
+  {
+    path: '/',
+    name: 'search',
+    component: () => import('../views/SearchView.vue'),
+  },
+]

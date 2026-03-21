@@ -148,7 +148,7 @@ const emit = defineEmits<{
         <div class="intro-copy">
           <span class="eyebrow">THB Music Lookup</span>
           <h1>同人音乐专辑查询</h1>
-          <p>本页面直接于<a href="https://thwiki.cc/%E5%90%8C%E4%BA%BA%E9%9F%B3%E4%B9%90%E4%B8%93%E8%BE%91%E6%9F%A5%E8%AF%A2" target="_blank" rel="noopener noreferrer">THBWiki的对应词条</a>中获取，并自动生成</p>
+          <p>基于<a href="https://thwiki.cc/%E5%90%8C%E4%BA%BA%E9%9F%B3%E4%B9%90%E4%B8%93%E8%BE%91%E6%9F%A5%E8%AF%A2" target="_blank" rel="noopener noreferrer">THBWiki 的对应词条</a>抓取并整理同人音乐专辑信息，支持按制作方、发售展会、发行年份、原曲、编曲、演唱等条件快速筛选。</p>
         </div>
 
         <v-menu

@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { computed, ref, onMounted, watch } from 'vue'
+import { useHead } from '@unhead/vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import SearchFiltersPanel from '../components/search/SearchFiltersPanel.vue'
 import SearchResults from '../components/search/SearchResults.vue'
 import SearchTopBar from '../components/search/SearchTopBar.vue'
+import { createSearchPageHead } from '../services/seo'
 import { routeQuerySignature } from '../services/searchRoute'
 import { useSearchStore } from '../stores/search'
 import type { SearchTag, ViewMode } from '../types/search'
@@ -12,6 +14,7 @@ const store = useSearchStore()
 const route = useRoute()
 const router = useRouter()
 const mobileFiltersOpen = ref(false)
+const hasActiveSearch = computed(() => Object.keys(route.query).some((key) => key !== 'view'))
 
 const statusBanner = computed(() => {
   if (store.isRefreshing) {
@@ -105,6 +108,16 @@ watch(
     }
   },
   { deep: true },
+)
+
+useHead(
+  () => createSearchPageHead({
+    hasActiveSearch: hasActiveSearch.value,
+    summary: store.appliedSummary,
+    totalCount: store.totalCount,
+    status: store.status,
+    results: store.results,
+  }),
 )
 </script>
 

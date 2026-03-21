@@ -6,4 +6,7 @@ import { thwikiBrowserProxy } from './dev/thwikiBrowserProxy'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [vue(), vuetify({ autoImport: true }), thwikiBrowserProxy()],
+  ssr: {
+    noExternal: ['vuetify'],
+  },
 })
