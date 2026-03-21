@@ -1,4 +1,5 @@
 import {
+  LIST_FILTER_KEYS,
   RANGE_BOUNDS,
   isRangeAtDefault,
   hasActiveCriteria,
@@ -71,7 +72,7 @@ export function toApiCriteria(criteria: SearchCriteriaDraft): ApiCriteriaPayload
     }
   }
 
-  for (const key of ['event', 'circle', 'coverchar', 'region', 'work', 'state', 'property', 'rate', 'only'] as const) {
+  for (const key of LIST_FILTER_KEYS) {
     if (criteria[key].length > 0) {
       payload[key as ItemField] = [...criteria[key]]
     }

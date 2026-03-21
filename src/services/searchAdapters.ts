@@ -24,7 +24,18 @@ const DETAIL_FIELD_ORDER: ItemField[] = [
   'region',
   'state',
   'style',
+  'ogwork',
+  'ogworkno',
+  'ogmusic',
+  'ogmusicno',
+  'original',
+  'noth',
+  'arrange',
+  'lyric',
   'compose',
+  'vocal',
+  'script',
+  'dub',
   'perform',
 ]
 

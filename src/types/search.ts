@@ -1,6 +1,6 @@
 export type ViewMode = 'card' | 'list'
 
-export const RANGE_FILTER_KEYS = ['establish', 'year', 'time'] as const
+export const RANGE_FILTER_KEYS = ['establish', 'year', 'time', 'ogmusicno', 'ogworkno'] as const
 export const LIST_FILTER_KEYS = [
   'event',
   'circle',
@@ -11,6 +11,18 @@ export const LIST_FILTER_KEYS = [
   'property',
   'rate',
   'only',
+  'style',
+  'ogmusic',
+  'ogwork',
+  'noth',
+  'original',
+  'arrange',
+  'lyric',
+  'compose',
+  'vocal',
+  'script',
+  'dub',
+  'perform',
 ] as const
 
 export type RangeFilterKey = (typeof RANGE_FILTER_KEYS)[number]
@@ -22,6 +34,8 @@ export interface SearchCriteriaDraft {
   establish: [number, number]
   year: [number, number]
   time: [number, number]
+  ogmusicno: [number, number]
+  ogworkno: [number, number]
   event: string[]
   circle: string[]
   coverchar: string[]
@@ -31,6 +45,18 @@ export interface SearchCriteriaDraft {
   property: string[]
   rate: string[]
   only: string[]
+  style: string[]
+  ogmusic: string[]
+  ogwork: string[]
+  noth: string[]
+  original: string[]
+  arrange: string[]
+  lyric: string[]
+  compose: string[]
+  vocal: string[]
+  script: string[]
+  dub: string[]
+  perform: string[]
 }
 
 export interface SearchTag {
@@ -103,18 +129,27 @@ export const ITEM_PROP_TYPE = {
   circle: '_wpg',
   date: '_dat',
   time: '_dur',
+  arrange: '_wpg',
   compose: '_wpg',
+  lyric: '_wpg',
   script: '_wpg',
   dub: '_wpg',
   perform: '_wpg',
+  vocal: '_wpg',
   name: '_txt',
   alname: '_txt',
   event: '_wpg',
   year: '_num',
+  ogmusicno: '_num',
+  ogworkno: '_num',
   rate: '_txt',
   property: '_txt',
   style: '_txt',
   only: '_txt',
+  ogmusic: '_wpg',
+  ogwork: '_wpg',
+  noth: '_txt',
+  original: '_txt',
   price: '_pri',
   eventprice: '_pri',
   shopprice: '_pri',
@@ -156,12 +191,16 @@ export const RANGE_BOUNDS: Record<RangeFilterKey, { min: number; max: number }> 
   establish: { min: 2000, max: 2032 },
   year: { min: 2000, max: 2032 },
   time: { min: 0, max: 2100 },
+  ogmusicno: { min: 0, max: 20 },
+  ogworkno: { min: 0, max: 20 },
 }
 
 export const FIELD_LABELS: Record<string, string> = {
   establish: '成立年份',
   year: '发行年份',
   time: '时长',
+  ogmusicno: '使用原曲数',
+  ogworkno: '原曲出处数',
   event: '发售展会',
   circle: '制作方',
   coverchar: '封面角色',
@@ -171,9 +210,16 @@ export const FIELD_LABELS: Record<string, string> = {
   property: '属性',
   rate: '分级',
   only: '仅限条件',
-  style: '风格',
+  style: '风格类型',
+  ogmusic: '使用原曲',
+  ogwork: '原曲出处',
+  noth: '非东方曲',
+  original: '原创曲',
+  arrange: '编曲',
+  lyric: '作词',
   compose: '作曲',
-  script: '作词',
+  vocal: '演唱',
+  script: '剧本',
   dub: '配音',
   perform: '演奏',
   official: '官网',
@@ -187,6 +233,8 @@ export function createDefaultCriteria(): SearchCriteriaDraft {
     establish: [RANGE_BOUNDS.establish.min, RANGE_BOUNDS.establish.max],
     year: [RANGE_BOUNDS.year.min, RANGE_BOUNDS.year.max],
     time: [RANGE_BOUNDS.time.min, RANGE_BOUNDS.time.max],
+    ogmusicno: [RANGE_BOUNDS.ogmusicno.min, RANGE_BOUNDS.ogmusicno.max],
+    ogworkno: [RANGE_BOUNDS.ogworkno.min, RANGE_BOUNDS.ogworkno.max],
     event: [],
     circle: [],
     coverchar: [],
@@ -196,6 +244,18 @@ export function createDefaultCriteria(): SearchCriteriaDraft {
     property: [],
     rate: [],
     only: [],
+    style: [],
+    ogmusic: [],
+    ogwork: [],
+    noth: [],
+    original: [],
+    arrange: [],
+    lyric: [],
+    compose: [],
+    vocal: [],
+    script: [],
+    dub: [],
+    perform: [],
   }
 }
 
@@ -205,6 +265,8 @@ export function cloneCriteria(criteria: SearchCriteriaDraft): SearchCriteriaDraf
     establish: [...criteria.establish] as [number, number],
     year: [...criteria.year] as [number, number],
     time: [...criteria.time] as [number, number],
+    ogmusicno: [...criteria.ogmusicno] as [number, number],
+    ogworkno: [...criteria.ogworkno] as [number, number],
     event: [...criteria.event],
     circle: [...criteria.circle],
     coverchar: [...criteria.coverchar],
@@ -214,6 +276,18 @@ export function cloneCriteria(criteria: SearchCriteriaDraft): SearchCriteriaDraf
     property: [...criteria.property],
     rate: [...criteria.rate],
     only: [...criteria.only],
+    style: [...criteria.style],
+    ogmusic: [...criteria.ogmusic],
+    ogwork: [...criteria.ogwork],
+    noth: [...criteria.noth],
+    original: [...criteria.original],
+    arrange: [...criteria.arrange],
+    lyric: [...criteria.lyric],
+    compose: [...criteria.compose],
+    vocal: [...criteria.vocal],
+    script: [...criteria.script],
+    dub: [...criteria.dub],
+    perform: [...criteria.perform],
   }
 }
 
@@ -255,6 +329,14 @@ export function hasActiveCriteria(criteria: SearchCriteriaDraft): boolean {
   }
 
   if (!isRangeAtDefault('time', criteria.time)) {
+    return true
+  }
+
+  if (!isRangeAtDefault('ogmusicno', criteria.ogmusicno)) {
+    return true
+  }
+
+  if (!isRangeAtDefault('ogworkno', criteria.ogworkno)) {
     return true
   }
 

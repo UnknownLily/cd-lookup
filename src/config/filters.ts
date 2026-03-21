@@ -74,6 +74,34 @@ export const FILTER_GROUPS: FilterGroup[] = [
       { key: 'only', label: '仅限条件', type: 'taglist', items: [], hint: '预留字段，支持以后扩展。' },
     ],
   },
+  {
+    id: 'track-meta',
+    title: '曲目属性',
+    description: '风格、原曲、原曲出处、原创与非东方标记',
+    filters: [
+      { key: 'style', label: '风格类型', type: 'taglist', items: [], hint: '可手动输入风格分类，远程建议当前可能受后端数据影响。', suggestionSource: '风格类型建议' },
+      { key: 'ogmusic', label: '使用原曲', type: 'taglist', items: [], hint: '可输入 THBWiki 收录的原曲名称，也可使用远程建议。', suggestionSource: '曲目原曲建议' },
+      { key: 'ogmusicno', label: '使用原曲数', type: 'range', min: 0, max: 20 },
+      { key: 'ogwork', label: '原曲出处', type: 'taglist', items: [], hint: '可输入 THBWiki 收录的原曲出处，也可使用远程建议。', suggestionSource: '曲目来源建议' },
+      { key: 'ogworkno', label: '原曲出处数', type: 'range', min: 0, max: 20 },
+      { key: 'noth', label: '非东方曲', type: 'checklist', items: ['非东方'] },
+      { key: 'original', label: '原创曲', type: 'checklist', items: ['原创'] },
+    ],
+  },
+  {
+    id: 'track-credits',
+    title: '曲目参与者',
+    description: '编曲、作词、作曲、演唱、剧本、配音、演奏',
+    filters: [
+      { key: 'arrange', label: '编曲', type: 'taglist', items: [], hint: '支持直接输入编曲者名称，也可使用远程建议。', suggestionSource: '编曲建议' },
+      { key: 'lyric', label: '作词', type: 'taglist', items: [], hint: '支持直接输入作词者名称，也可使用远程建议。', suggestionSource: '作词建议' },
+      { key: 'compose', label: '作曲', type: 'taglist', items: [], hint: '支持直接输入作曲者名称，也可使用远程建议。', suggestionSource: '作曲建议' },
+      { key: 'vocal', label: '演唱', type: 'taglist', items: [], hint: '支持直接输入演唱者名称，也可使用远程建议。', suggestionSource: '演唱建议' },
+      { key: 'script', label: '剧本', type: 'taglist', items: [], hint: '支持直接输入剧本作者名称，也可使用远程建议。', suggestionSource: '剧本建议' },
+      { key: 'dub', label: '配音', type: 'taglist', items: [], hint: '支持直接输入配音者名称，也可使用远程建议。', suggestionSource: '配音建议' },
+      { key: 'perform', label: '演奏', type: 'taglist', items: [], hint: '支持直接输入演奏者名称。' },
+    ],
+  },
 ]
 
 export function isRangeFilter(filter: FilterDefinition): filter is RangeFilterDefinition {
