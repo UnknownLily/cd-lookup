@@ -318,12 +318,12 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
   left: 0;
   right: 0;
   bottom: 0;
-  height: 220px;
+  height: 248px;
   pointer-events: none;
   opacity: 0;
   z-index: 2;
   background:
-    linear-gradient(180deg, rgba(255, 247, 250, 0) 0%, rgba(255, 245, 249, 0.025) 16%, rgba(252, 239, 244, 0.1) 34%, rgba(249, 234, 240, 0.26) 54%, rgba(247, 231, 237, 0.44) 76%, rgba(245, 228, 234, 0.62) 100%),
+    linear-gradient(180deg, rgba(255, 247, 250, 0) 0%, rgba(255, 245, 249, 0.035) 12%, rgba(252, 239, 244, 0.12) 28%, rgba(249, 234, 240, 0.3) 48%, rgba(247, 231, 237, 0.48) 72%, rgba(245, 228, 234, 0.64) 100%),
     radial-gradient(circle at 50% 100%, rgba(255, 250, 252, 0.14), transparent 60%);
   transition: opacity 220ms ease;
 }
@@ -377,11 +377,11 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
 .card-image-wash {
   z-index: 3;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(251, 242, 246, 0.02) 10%, rgba(249, 236, 241, 0.08) 22%, rgba(248, 232, 238, 0.24) 38%, rgba(247, 231, 237, 0.5) 58%, rgba(246, 229, 235, 0.76) 78%, rgba(245, 227, 234, 0.94) 100%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(251, 242, 246, 0.03) 8%, rgba(249, 236, 241, 0.11) 18%, rgba(248, 232, 238, 0.28) 32%, rgba(247, 231, 237, 0.54) 52%, rgba(246, 229, 235, 0.8) 74%, rgba(245, 227, 234, 0.95) 100%),
     radial-gradient(circle at 18% 22%, rgba(255, 250, 252, 0.14), transparent 22%),
     radial-gradient(circle at 84% 14%, rgba(var(--v-theme-accent), 0.12), transparent 24%);
-  -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.03) 12%, rgba(0, 0, 0, 0.12) 26%, rgba(0, 0, 0, 0.32) 44%, rgba(0, 0, 0, 0.64) 66%, rgba(0, 0, 0, 0.9) 84%, rgba(0, 0, 0, 1) 100%);
-  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.03) 12%, rgba(0, 0, 0, 0.12) 26%, rgba(0, 0, 0, 0.32) 44%, rgba(0, 0, 0, 0.64) 66%, rgba(0, 0, 0, 0.9) 84%, rgba(0, 0, 0, 1) 100%);
+  -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.04) 8%, rgba(0, 0, 0, 0.15) 20%, rgba(0, 0, 0, 0.36) 36%, rgba(0, 0, 0, 0.68) 58%, rgba(0, 0, 0, 0.92) 80%, rgba(0, 0, 0, 1) 100%);
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.04) 8%, rgba(0, 0, 0, 0.15) 20%, rgba(0, 0, 0, 0.36) 36%, rgba(0, 0, 0, 0.68) 58%, rgba(0, 0, 0, 0.92) 80%, rgba(0, 0, 0, 1) 100%);
 }
 
 .cover-fallback {
@@ -422,18 +422,18 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
   position: absolute;
   left: 0;
   right: 0;
-  top: -320px;
+  top: -344px;
   bottom: 0;
   pointer-events: none;
   opacity: 0;
   background:
-    linear-gradient(180deg, rgba(255, 247, 250, 0) 0%, rgba(255, 245, 249, 0.008) 20%, rgba(252, 239, 244, 0.04) 34%, rgba(249, 234, 240, 0.12) 50%, rgba(247, 231, 237, 0.28) 70%, rgba(245, 228, 234, 0.52) 100%),
+    linear-gradient(180deg, rgba(255, 247, 250, 0) 0%, rgba(255, 245, 249, 0.012) 16%, rgba(252, 239, 244, 0.055) 30%, rgba(249, 234, 240, 0.16) 46%, rgba(247, 231, 237, 0.34) 66%, rgba(245, 228, 234, 0.58) 100%),
     radial-gradient(circle at 24% 18%, rgba(255, 250, 252, 0.16), transparent 24%),
     radial-gradient(circle at 80% 8%, rgba(var(--v-theme-accent), 0.14), transparent 28%);
   backdrop-filter: blur(14px) saturate(1.08);
   -webkit-backdrop-filter: blur(14px) saturate(1.08);
-  -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.02) 12%, rgba(0, 0, 0, 0.08) 26%, rgba(0, 0, 0, 0.22) 42%, rgba(0, 0, 0, 0.5) 64%, rgba(0, 0, 0, 0.84) 84%, rgba(0, 0, 0, 1) 100%);
-  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.02) 12%, rgba(0, 0, 0, 0.08) 26%, rgba(0, 0, 0, 0.22) 42%, rgba(0, 0, 0, 0.5) 64%, rgba(0, 0, 0, 0.84) 84%, rgba(0, 0, 0, 1) 100%);
+  -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.025) 10%, rgba(0, 0, 0, 0.1) 22%, rgba(0, 0, 0, 0.26) 38%, rgba(0, 0, 0, 0.56) 60%, rgba(0, 0, 0, 0.88) 82%, rgba(0, 0, 0, 1) 100%);
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.025) 10%, rgba(0, 0, 0, 0.1) 22%, rgba(0, 0, 0, 0.26) 38%, rgba(0, 0, 0, 0.56) 60%, rgba(0, 0, 0, 0.88) 82%, rgba(0, 0, 0, 1) 100%);
   transition: opacity 220ms ease;
 }
 

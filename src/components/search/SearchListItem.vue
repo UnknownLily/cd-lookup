@@ -33,46 +33,48 @@ const emit = defineEmits<{
       <div class="list-body-wash" aria-hidden="true" />
 
       <div class="list-body-content">
-        <div class="list-header">
-          <div>
-            <h3>{{ item.title }}</h3>
-            <p>{{ item.subtitle }}</p>
-            <div v-if="item.aliases.length > 0" class="list-aliases">
-              <span v-for="alias in item.aliases.slice(0, 3)" :key="alias">{{ alias }}</span>
+        <div class="list-summary">
+          <div class="list-header">
+            <div>
+              <h3>{{ item.title }}</h3>
+              <p>{{ item.subtitle }}</p>
+              <div v-if="item.aliases.length > 0" class="list-aliases">
+                <span v-for="alias in item.aliases.slice(0, 3)" :key="alias">{{ alias }}</span>
+              </div>
             </div>
+
+            <v-btn
+              class="result-action-btn"
+              color="primary"
+              variant="tonal"
+              append-icon="$externalLink"
+              :href="item.wikiUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              前往 Wiki
+            </v-btn>
           </div>
 
-          <v-btn
-            class="result-action-btn"
-            color="primary"
-            variant="tonal"
-            append-icon="$externalLink"
-            :href="item.wikiUrl"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            前往 Wiki
-          </v-btn>
-        </div>
+          <div v-if="item.meta.length > 0" class="list-meta">
+            <span v-for="line in item.meta" :key="line">{{ line }}</span>
+          </div>
 
-        <div v-if="item.meta.length > 0" class="list-meta">
-          <span v-for="line in item.meta" :key="line">{{ line }}</span>
-        </div>
-
-        <div v-if="item.links.length > 0" class="list-links">
-          <v-btn
-            class="result-link-btn"
-            v-for="link in item.links.slice(0, 2)"
-            :key="link.key"
-            size="small"
-            variant="text"
-            color="secondary"
-            :href="link.url"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {{ link.label }}
-          </v-btn>
+          <div v-if="item.links.length > 0" class="list-links">
+            <v-btn
+              class="result-link-btn"
+              v-for="link in item.links.slice(0, 2)"
+              :key="link.key"
+              size="small"
+              variant="text"
+              color="secondary"
+              :href="link.url"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {{ link.label }}
+            </v-btn>
+          </div>
         </div>
 
         <div class="dense-sections">
@@ -193,7 +195,15 @@ const emit = defineEmits<{
   position: relative;
   z-index: 1;
   display: grid;
+  grid-template-columns: minmax(220px, 300px) minmax(0, 1fr);
+  gap: 18px 26px;
+  align-items: start;
+}
+
+.list-summary {
+  display: grid;
   gap: 14px;
+  min-width: 0;
 }
 
 .list-body-art {
@@ -226,6 +236,7 @@ const emit = defineEmits<{
   margin: 0;
   font-family: 'Noto Serif SC', 'Source Han Serif SC', serif;
   font-size: 1.16rem;
+  line-height: 1.35;
 }
 
 .list-header p {
@@ -250,7 +261,6 @@ const emit = defineEmits<{
   font-size: 0.86rem;
 }
 
-.list-tags,
 .dense-tags,
 .list-links {
   display: flex;
@@ -260,19 +270,48 @@ const emit = defineEmits<{
 
 .dense-sections {
   display: grid;
-  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px 18px;
+  align-content: start;
 }
 
 .dense-section {
   display: grid;
-  grid-template-columns: 90px minmax(0, 1fr);
-  gap: 12px;
+  grid-template-columns: 78px minmax(0, 1fr);
+  gap: 10px;
   align-items: start;
 }
 
 .dense-section strong {
   color: var(--text-soft);
   font-size: 0.86rem;
+  line-height: 1.75;
+}
+
+.dense-tags {
+  gap: 6px;
+}
+
+@media (max-width: 860px) {
+  .list-item {
+    grid-template-columns: 168px minmax(0, 1fr);
+  }
+
+  .list-body-content {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .dense-sections {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .dense-sections {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
 }
 
 @media (max-width: 720px) {
@@ -287,7 +326,6 @@ const emit = defineEmits<{
   .list-header {
     flex-direction: column;
   }
-
   .list-body-art {
     inset: 44% -8% -10% -8%;
     opacity: 0.32;
