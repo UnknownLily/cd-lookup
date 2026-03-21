@@ -9,6 +9,7 @@ import {
   type RangeFilterKey,
   type SearchCriteriaDraft,
 } from '../types/search'
+import { LocalizedError, createMessage } from '../i18n'
 
 const API_BASE = import.meta.env.DEV ? '/api/asktrack/v0' : 'https://thwiki.cc/rest/asktrack/v0'
 const EXTRA_CRITERIA: ApiCriteriaPayload = {
@@ -112,7 +113,7 @@ export async function fetchSearchPage(
   const payload = toApiCriteria(criteria)
 
   if (!payload) {
-    throw new Error('至少需要一个搜索条件')
+    throw new LocalizedError(createMessage('errors.atLeastOneCriteria'))
   }
 
   const offset = options.offset ?? 0
@@ -128,7 +129,7 @@ export async function fetchSearchPage(
   })
 
   if (!response.ok) {
-    throw new Error(`接口请求失败：${response.status}`)
+    throw new LocalizedError(createMessage('errors.apiRequestFailed', { status: response.status }))
   }
 
   return (await response.json()) as QueryResponse

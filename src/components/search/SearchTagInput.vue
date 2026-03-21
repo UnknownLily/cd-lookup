@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { currentLocale } from '../../i18n'
 import { getTagSuggestions } from '../../services/tagSuggestions'
 
 const props = defineProps<{
@@ -14,10 +16,12 @@ const emit = defineEmits<{
   'update:modelValue': [value: string[]]
 }>()
 
+const { t } = useI18n()
+
 const search = ref('')
 const loading = ref(false)
 const suggestions = ref<string[]>([])
-const statusMessage = ref(props.hint ?? '')
+const statusMessage = ref(props.hint ?? t('tagInput.fallbackHint'))
 const sourceBadge = ref('')
 let debounceTimer: ReturnType<typeof setTimeout> | null = null
 let currentController: AbortController | null = null
@@ -45,8 +49,8 @@ async function loadSuggestions(term: string): Promise<void> {
 
   loading.value = true
   statusMessage.value = term.trim()
-    ? '正在搜索匹配标签…'
-    : props.hint ?? '可直接输入，也可从建议列表中选择。'
+    ? t('tagInput.loading')
+    : props.hint ?? t('tagInput.fallbackHint')
 
   try {
     const result = await getTagSuggestions({
@@ -60,28 +64,28 @@ async function loadSuggestions(term: string): Promise<void> {
     suggestions.value = result.suggestions
 
     if (!term.trim()) {
-      sourceBadge.value = result.remoteAvailable ? '可用远程建议' : '当前为本地候选'
+      sourceBadge.value = result.remoteAvailable ? t('tagInput.remoteReady') : t('tagInput.localFallback')
     } else if (result.source === 'remote') {
-      sourceBadge.value = '远程建议'
+      sourceBadge.value = t('tagInput.remoteOnly')
     } else if (result.source === 'mixed') {
-      sourceBadge.value = '远程 + 本地匹配'
+      sourceBadge.value = t('tagInput.mixed')
     } else {
-      sourceBadge.value = result.remoteAvailable ? '本地匹配' : '本地回退'
+      sourceBadge.value = result.remoteAvailable ? t('tagInput.localOnly') : t('tagInput.localFallbackBadge')
     }
 
     if (term.trim() && suggestions.value.length === 0) {
-      statusMessage.value = '没有匹配建议，你仍然可以直接输入并保留该标签。'
+      statusMessage.value = t('tagInput.noResult')
     } else if (!result.remoteAvailable && term.trim()) {
       statusMessage.value = result.errorMessage
-        ? `远程建议不可用，当前仅显示本地匹配。${result.errorMessage}`
-        : '远程建议不可用，当前仅显示本地匹配。'
+        ? `${t('tagInput.remoteUnavailable')}${result.errorMessage}`
+        : t('tagInput.remoteUnavailable')
     } else {
-      statusMessage.value = props.hint ?? '支持远程建议与手动输入。'
+      statusMessage.value = props.hint ?? t('tagInput.fallbackStatus')
     }
   } catch (error) {
     if (!(error instanceof DOMException && error.name === 'AbortError')) {
-      statusMessage.value = '建议接口暂不可用，已退回本地搜索。'
-      sourceBadge.value = '本地回退'
+      statusMessage.value = t('tagInput.unavailable')
+      sourceBadge.value = t('tagInput.localFallbackBadge')
     }
   } finally {
     loading.value = false
@@ -108,6 +112,10 @@ watch(
   },
   { deep: true },
 )
+
+watch(currentLocale, () => {
+  void loadSuggestions(search.value)
+})
 
 function handleModelValue(value: unknown): void {
   if (!Array.isArray(value)) {
@@ -163,10 +171,10 @@ onBeforeUnmount(() => {
     <template #prepend-item>
       <div class="search-tip">
         <div class="search-tip-head">
-          <div class="search-tip-title">标签搜索</div>
+          <div class="search-tip-title">{{ t('tagInput.panelTitle') }}</div>
           <span v-if="sourceBadge" class="source-badge">{{ sourceBadge }}</span>
         </div>
-        <div class="search-tip-text">输入关键字后会优先做本地筛选，并在可用时拉取远程建议。</div>
+        <div class="search-tip-text">{{ t('tagInput.panelText') }}</div>
       </div>
     </template>
   </v-combobox>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import SearchCard from './SearchCard.vue'
 import SearchListItem from './SearchListItem.vue'
 import type { SearchResultItem, SearchStatus, SearchTag, ViewMode } from '../../types/search'
@@ -13,6 +14,8 @@ const props = defineProps<{
   isLoadingMore: boolean
   isInitialLoading: boolean
 }>()
+
+const { t } = useI18n()
 
 const emit = defineEmits<{
   loadMore: []
@@ -59,13 +62,13 @@ onBeforeUnmount(() => {
   <section class="results-panel">
     <header class="results-head">
       <div class="results-title-block">
-        <h2>结果展示</h2>
-        <p>默认以卡片布局显示，支持切换为列表布局。</p>
+        <h2>{{ t('results.panelTitle') }}</h2>
+        <p>{{ t('results.panelDescription') }}</p>
       </div>
       <div class="results-toolbar">
-        <div class="results-count">{{ totalCount > 0 ? `已返回 ${results.length} / ${totalCount}` : '等待查询' }}</div>
+        <div class="results-count">{{ totalCount > 0 ? t('status.returnedCount', { shown: results.length, total: totalCount }) : t('status.waitingQuery') }}</div>
         <div class="view-switcher">
-          <span class="view-switcher-label">布局</span>
+          <span class="view-switcher-label">{{ t('results.viewMode') }}</span>
           <v-btn-toggle
             class="view-toggle"
             mandatory
@@ -73,8 +76,8 @@ onBeforeUnmount(() => {
             :model-value="viewMode"
             @update:model-value="emit('updateViewMode', $event)"
           >
-            <v-btn value="card" icon="$viewCard" aria-label="卡片布局" />
-            <v-btn value="list" icon="$viewList" aria-label="列表布局" />
+            <v-btn value="card" icon="$viewCard" :aria-label="t('results.viewCard')" />
+            <v-btn value="list" icon="$viewList" :aria-label="t('results.viewList')" />
           </v-btn-toggle>
         </div>
       </div>
@@ -82,20 +85,20 @@ onBeforeUnmount(() => {
 
     <div v-if="status === 'idle'" class="results-empty">
       <v-icon icon="$searchScan" size="40" />
-      <h3>先设定筛选条件再开始查询</h3>
-      <p>由于后端响应较慢，建议先用年份、制作方、作品类型等条件缩小范围，再点击应用。</p>
+      <h3>{{ t('results.idleTitle') }}</h3>
+      <p>{{ t('results.idleText') }}</p>
     </div>
 
     <div v-else-if="status === 'error' && results.length === 0" class="results-empty">
       <v-icon icon="$alertCircleOutline" size="40" />
-      <h3>请求失败</h3>
-      <p>后端接口当前没有返回可用结果，请稍后重试或收窄筛选范围。</p>
+      <h3>{{ t('results.errorTitle') }}</h3>
+      <p>{{ t('results.errorText') }}</p>
     </div>
 
     <div v-else-if="status === 'empty'" class="results-empty">
       <v-icon icon="$fileSearchOutline" size="40" />
-      <h3>没有匹配结果</h3>
-      <p>可以尝试放宽年份范围、减少标签限制，或切换到不同的关键词组合。</p>
+      <h3>{{ t('results.emptyTitle') }}</h3>
+      <p>{{ t('results.emptyText') }}</p>
     </div>
 
     <template v-else>
@@ -156,7 +159,7 @@ onBeforeUnmount(() => {
 
       <div v-if="isLoadingMore" class="load-more-state">
         <v-progress-circular color="primary" indeterminate />
-        <span>正在加载更多结果…</span>
+        <span>{{ t('status.loadingMore') }}</span>
       </div>
     </template>
   </section>

@@ -1,3 +1,5 @@
+import { t } from '../i18n'
+
 const SUGGEST_API = import.meta.env.DEV ? '/api/ajax.php' : 'https://thwiki.cc/ajax.php'
 const DEFAULT_LIMIT = 24
 const suggestionCache = new Map<string, string[]>()
@@ -133,7 +135,7 @@ async function remoteSearch(sourceTitle: string, term: string, signal?: AbortSig
 
   const response = await fetch(`${SUGGEST_API}?${query.toString()}`, { signal })
   if (!response.ok) {
-    throw new Error(`标签建议请求失败：${response.status}`)
+    throw new Error(t('errors.tagSuggestionFailed', { status: response.status }))
   }
 
   const html = await response.text()
@@ -183,7 +185,7 @@ export async function getTagSuggestions(options: {
       suggestions: localMatches,
       source: 'local',
       remoteAvailable: false,
-      errorMessage: error instanceof Error ? error.message : '建议接口不可用',
+      errorMessage: error instanceof Error ? error.message : t('errors.suggestionUnavailable'),
     }
   }
 }

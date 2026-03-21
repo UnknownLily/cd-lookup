@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { currentLocale, localeOptions, setLocale, type SupportedLocale } from '../../i18n'
 import { getKeywordSuggestions, type KeywordSuggestion } from '../../services/keywordResolver'
-import type { SearchTag } from '../../types/search'
+import { getFieldLabel, getFilterValueLabel, type SearchTag } from '../../types/search'
 
 const props = defineProps<{
   keyword: string
@@ -14,13 +16,15 @@ const props = defineProps<{
   isRefreshing: boolean
 }>()
 
+const { t } = useI18n()
+
 const statusBadgeText = computed(() => {
   if (props.hasPendingChanges) {
-    return '有待应用的筛选变更'
+    return t('status.pendingChanges')
   }
 
   if (props.isRefreshing) {
-    return '正在按新条件查询'
+    return t('status.refreshing')
   }
 
   return ''
@@ -30,15 +34,22 @@ const selectedSuggestionItems = computed<KeywordSuggestion[]>(() =>
   props.quickTags.map((tag) => ({
     key: tag.field as KeywordSuggestion['key'],
     value: tag.value,
-    fieldLabel: tag.label,
+    fieldLabel: getFieldLabel(tag.field),
   })),
 )
 const selectedSuggestionKeys = computed(() => new Set(selectedSuggestionItems.value.map((item) => `${item.key}::${item.value}`)))
 
 const suggestionItems = ref<KeywordSuggestion[]>([])
 const suggestionLoading = ref(false)
-const suggestionHint = ref('输入已知标签后可直接选择建议项。')
+const suggestionHint = ref(t('topBar.suggestionHintInitial'))
 const suggestionMenuOpen = ref(false)
+const localeMenuOpen = ref(false)
+const selectedLocale = computed({
+  get: () => currentLocale.value,
+  set: (value: SupportedLocale) => setLocale(value),
+})
+const localizedLocaleOptions = computed(() => localeOptions.map((item) => ({ value: item.value, title: t(item.labelKey) })))
+const currentLocaleTitle = computed(() => localizedLocaleOptions.value.find((item) => item.value === selectedLocale.value)?.title ?? '')
 let debounceTimer: ReturnType<typeof setTimeout> | null = null
 let currentController: AbortController | null = null
 
@@ -47,7 +58,7 @@ async function loadSuggestions(term: string): Promise<void> {
 
   if (!term.trim()) {
     suggestionItems.value = []
-    suggestionHint.value = '输入制作方、发售展会、原曲或参与者后，可直接从下拉建议中选择。'
+    suggestionHint.value = t('topBar.suggestionHintEmpty')
     suggestionLoading.value = false
     suggestionMenuOpen.value = false
     return
@@ -55,7 +66,7 @@ async function loadSuggestions(term: string): Promise<void> {
 
   currentController = new AbortController()
   suggestionLoading.value = true
-  suggestionHint.value = '正在加载自动归类建议…'
+  suggestionHint.value = t('topBar.suggestionHintLoading')
 
   try {
     const nextSuggestions = await getKeywordSuggestions(term, currentController.signal)
@@ -63,15 +74,15 @@ async function loadSuggestions(term: string): Promise<void> {
     suggestionMenuOpen.value = suggestionItems.value.length > 0
     suggestionHint.value = suggestionItems.value.length > 0
       ? suggestionItems.value.length === 1
-        ? '当前只有一个明确建议，按回车可直接加入筛选。'
-        : '建议项会显示它将归入的筛选字段。'
+        ? t('topBar.suggestionHintSingle')
+        : t('topBar.suggestionHintMultiple')
       : nextSuggestions.length > 0
-        ? '匹配到的建议已在当前筛选中。'
-      : '没有找到建议项，你仍可直接输入后再应用。'
+        ? t('topBar.suggestionHintAlreadySelected')
+      : t('topBar.suggestionHintNoResult')
   } catch (error) {
     if (!(error instanceof DOMException && error.name === 'AbortError')) {
       suggestionItems.value = []
-      suggestionHint.value = '建议接口暂不可用，可继续直接输入。'
+      suggestionHint.value = t('topBar.suggestionHintUnavailable')
       suggestionMenuOpen.value = false
     }
   } finally {
@@ -92,6 +103,10 @@ watch(
   },
   { immediate: true },
 )
+
+watch(currentLocale, () => {
+  void loadSuggestions(props.keyword)
+})
 
 function handleKeywordInput(value: unknown): void {
   emit('updateKeyword', String(value ?? ''))
@@ -115,6 +130,11 @@ function handleKeywordEnter(): void {
   }
 
   emit('apply')
+}
+
+function handleLocalePick(locale: SupportedLocale): void {
+  selectedLocale.value = locale
+  localeMenuOpen.value = false
 }
 
 function handleKeywordFocus(): void {
@@ -146,9 +166,9 @@ const emit = defineEmits<{
     <div class="top-main">
       <div class="top-search">
         <div class="intro-copy">
-          <span class="eyebrow">THB Music Lookup</span>
-          <h1>同人音乐专辑查询</h1>
-          <p>基于<a href="https://thwiki.cc/%E5%90%8C%E4%BA%BA%E9%9F%B3%E4%B9%90%E4%B8%93%E8%BE%91%E6%9F%A5%E8%AF%A2" target="_blank" rel="noopener noreferrer">THBWiki 的对应词条</a>抓取并整理同人音乐专辑信息，支持按制作方、发售展会、发行年份、原曲、编曲、演唱等条件快速筛选。</p>
+          <span class="eyebrow">{{ t('app.altName') }}</span>
+          <h1>{{ t('app.title') }}</h1>
+          <p>{{ t('app.introBeforeLink') }}<a href="https://thwiki.cc/%E5%90%8C%E4%BA%BA%E9%9F%B3%E4%B9%90%E4%B8%93%E8%BE%91%E6%9F%A5%E8%AF%A2" target="_blank" rel="noopener noreferrer">{{ t('app.introLinkText') }}</a>{{ t('app.introAfterLink') }}</p>
         </div>
 
         <v-menu
@@ -167,8 +187,8 @@ const emit = defineEmits<{
               :model-value="keyword"
               :hint="suggestionHint"
               persistent-hint
-              label="快捷标签"
-              placeholder="输入制作方、原曲、原曲出处或参与者，应用时会自动归入筛选"
+              :label="t('topBar.quickTagLabel')"
+              :placeholder="t('topBar.quickTagPlaceholder')"
               prepend-inner-icon="$search"
               clearable
               @update:model-value="handleKeywordInput"
@@ -200,10 +220,10 @@ const emit = defineEmits<{
           <v-card class="keyword-menu" rounded="xl" variant="flat">
             <div class="keyword-tip">
               <div class="keyword-tip-head">
-                <div class="keyword-tip-title">自动补全建议/消歧义</div>
-                <span class="keyword-tip-badge">自动补全</span>
+                <div class="keyword-tip-title">{{ t('topBar.suggestionPanelTitle') }}</div>
+                <span class="keyword-tip-badge">{{ t('topBar.suggestionPanelBadge') }}</span>
               </div>
-              <div class="keyword-tip-text">下拉项会显示这个词会被归入哪个筛选字段，确认后再应用即可。</div>
+              <div class="keyword-tip-text">{{ t('topBar.suggestionPanelText') }}</div>
             </div>
 
             <v-list class="keyword-list" density="comfortable">
@@ -227,18 +247,62 @@ const emit = defineEmits<{
             class="quick-tag-chip"
             @click:close="emit('removeQuickTag', { field: item.key, label: item.fieldLabel, value: item.value, filterable: true })"
           >
-            {{ `${item.fieldLabel}：${item.value}` }}
+            {{ `${item.fieldLabel}：${getFilterValueLabel(item.key, item.value)}` }}
           </v-chip>
         </div>
       </div>
 
       <div class="top-actions">
+        <v-menu
+          v-model="localeMenuOpen"
+          location="bottom end"
+          offset="10"
+        >
+          <template #activator="{ props: menuProps }">
+            <div class="locale-field-wrap">
+              <div class="locale-field-label">{{ t('locale.label') }}</div>
+              <v-btn
+                v-bind="menuProps"
+                class="locale-select"
+                variant="outlined"
+                rounded="xl"
+                append-icon="$expand"
+              >
+                {{ currentLocaleTitle }}
+              </v-btn>
+            </div>
+          </template>
+
+          <v-card class="keyword-menu locale-menu-card" rounded="xl" variant="flat">
+            <div class="keyword-tip locale-tip">
+              <div class="keyword-tip-head">
+                <div class="keyword-tip-title">{{ t('locale.label') }}</div>
+                <span class="keyword-tip-badge">{{ currentLocaleTitle }}</span>
+              </div>
+              <div class="keyword-tip-text">{{ t('locale.menuDescription') }}</div>
+            </div>
+
+            <v-list class="keyword-list locale-list" density="comfortable">
+              <v-list-item
+                v-for="item in localizedLocaleOptions"
+                :key="item.value"
+                :active="item.value === selectedLocale"
+                @click="handleLocalePick(item.value)"
+              >
+                <template #title>
+                  <span class="locale-option-title">{{ item.title }}</span>
+                </template>
+              </v-list-item>
+            </v-list>
+          </v-card>
+        </v-menu>
+
         <v-btn class="mobile-filters top-action-btn" variant="outlined" prepend-icon="$filters" @click="emit('openFilters')">
-          筛选
+          {{ t('actions.filter') }}
         </v-btn>
 
         <div class="status-pill-slot top-status-pill-slot">
-          <span class="pending-pill" :class="{ 'pending-pill-hidden': !statusBadgeText }">{{ statusBadgeText || '占位状态文案' }}</span>
+          <span class="pending-pill" :class="{ 'pending-pill-hidden': !statusBadgeText }">{{ statusBadgeText || t('status.placeholderStatus') }}</span>
         </div>
       </div>
     </div>
@@ -248,16 +312,16 @@ const emit = defineEmits<{
         <v-chip v-for="item in summary.slice(0, 8)" :key="item" variant="tonal" color="secondary">
           {{ item }}
         </v-chip>
-        <span v-if="summary.length === 0" class="meta-text">尚未应用筛选条件</span>
+        <span v-if="summary.length === 0" class="meta-text">{{ t('status.noActiveFilters') }}</span>
       </div>
 
       <div class="status-panel">
-        <span class="meta-text">{{ totalCount > 0 ? `当前总结果数 ${totalCount}` : '应用条件后开始查询' }}</span>
+        <span class="meta-text">{{ totalCount > 0 ? t('status.totalCount', { count: totalCount }) : t('status.readyToSearch') }}</span>
         <div class="status-actions">
           <v-btn class="top-action-btn apply-action-btn" color="primary" :loading="isLoading" :disabled="!canSearch" @click="emit('apply')">
-            应用筛选
+            {{ t('actions.applyFilters') }}
           </v-btn>
-          <v-btn class="top-action-btn" variant="text" @click="emit('clear')">清空筛选</v-btn>
+          <v-btn class="top-action-btn" variant="text" @click="emit('clear')">{{ t('actions.clearFilters') }}</v-btn>
         </div>
       </div>
     </div>
@@ -320,6 +384,47 @@ const emit = defineEmits<{
   align-items: center;
 }
 
+.locale-field-wrap {
+  min-width: 176px;
+}
+
+.locale-field-label {
+  margin-bottom: 6px;
+  padding-left: 4px;
+  color: var(--text-soft);
+  font-size: 0.82rem;
+}
+
+.locale-select {
+  width: 100%;
+  min-height: 54px;
+  justify-content: space-between;
+  padding-inline: 18px;
+  border-radius: var(--search-input-radius);
+  border-color: rgba(41, 60, 64, 0.72) !important;
+  color: var(--text-strong) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.locale-select:hover,
+.locale-select:focus-visible {
+  border-color: rgba(41, 60, 64, 0.88) !important;
+  background: rgba(255, 255, 255, 0.34) !important;
+}
+
+.locale-select :deep(.v-btn__content) {
+  justify-content: space-between;
+  width: 100%;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.locale-select :deep(.v-btn__append) {
+  margin-inline-start: 12px;
+  color: rgba(31, 45, 51, 0.48);
+}
+
 .quick-tag-chip {
   max-width: min(240px, 32vw);
 }
@@ -353,6 +458,20 @@ const emit = defineEmits<{
 .keyword-list {
   padding: 8px;
   background: transparent !important;
+}
+
+.keyword-list :deep(.v-list-item) {
+  margin: 2px 0;
+  border-radius: 14px;
+  transition: background-color 160ms ease;
+}
+
+.keyword-list :deep(.v-list-item:hover) {
+  background: rgba(227, 143, 167, 0.08) !important;
+}
+
+.keyword-list :deep(.v-list-item--active) {
+  background: rgba(227, 143, 167, 0.12) !important;
 }
 
 .keyword-tip {
@@ -390,6 +509,28 @@ const emit = defineEmits<{
   margin-top: 4px;
   font-size: 0.82rem;
   color: var(--text-muted);
+}
+
+.locale-menu-card {
+  width: min(248px, calc(100vw - 48px));
+}
+
+.locale-tip {
+  padding-bottom: 10px;
+}
+
+.locale-list :deep(.v-list-item) {
+  min-height: 50px;
+}
+
+.locale-list :deep(.v-list-item--active) {
+  background: rgba(227, 143, 167, 0.07) !important;
+}
+
+.locale-option-title {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-strong);
 }
 
 .top-action-btn,

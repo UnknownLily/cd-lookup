@@ -1,14 +1,10 @@
 import type { SearchResultItem, SearchStatus } from '../types/search'
+import { getCurrentHtmlLang, getCurrentOgLocale, t } from '../i18n'
 
-const SITE_NAME = '同人音乐专辑查询'
-const SITE_ALT_NAME = 'THB Music Lookup'
-const DEFAULT_DESCRIPTION = '基于 THBWiki 数据的东方同人音乐专辑检索工具，支持按制作方、发售展会、发行年份、原曲、编曲、演唱等条件筛选。'
-const DEFAULT_KEYWORDS = '东方Project,THBWiki,同人音乐,专辑查询,东方同人音乐,专辑筛选'
 const SITE_URL = (import.meta.env.VITE_SITE_URL || 'https://cd.lilywhite.cc').replace(/\/+$/, '')
 const OG_IMAGE_PATH = '/og-image.svg'
 const OG_IMAGE_WIDTH = '1200'
 const OG_IMAGE_HEIGHT = '630'
-const OG_IMAGE_ALT = '同人音乐专辑查询分享图'
 
 export interface SearchPageSeoInput {
   hasActiveSearch: boolean
@@ -16,6 +12,7 @@ export interface SearchPageSeoInput {
   totalCount: number
   status: SearchStatus
   results: SearchResultItem[]
+  locale: string
 }
 
 function toPageUrl(pathWithSearch: string): string {
@@ -46,53 +43,55 @@ function getCurrentUrl(input: SearchPageSeoInput): string {
 }
 
 function buildTitle(input: SearchPageSeoInput): string {
+  const siteName = t('app.title')
   if (!input.hasActiveSearch) {
-    return `${SITE_NAME} | 东方同人音乐筛选工具`
+    return `${siteName} | ${t('seo.defaultTitle')}`
   }
 
-  const summaryText = input.summary.slice(0, 2).join('，') || '筛选结果'
+  const summaryText = input.summary.slice(0, 2).join('，') || t('seo.summaryFallback')
 
   if (input.status === 'error') {
-    return `${summaryText} - 查询失败 | ${SITE_NAME}`
+    return t('seo.titleError', { summary: summaryText, siteName })
   }
 
   if (input.status === 'empty') {
-    return `${summaryText} - 无匹配结果 | ${SITE_NAME}`
+    return t('seo.titleEmpty', { summary: summaryText, siteName })
   }
 
   if (input.totalCount > 0) {
-    return `${summaryText} - ${input.totalCount} 条结果 | ${SITE_NAME}`
+    return t('seo.titleCount', { summary: summaryText, count: input.totalCount, siteName })
   }
 
-  return `${summaryText} - 查询中 | ${SITE_NAME}`
+  return t('seo.titleLoading', { summary: summaryText, siteName })
 }
 
 function buildDescription(input: SearchPageSeoInput): string {
+  const defaultDescription = t('seo.description')
   if (!input.hasActiveSearch) {
-    return DEFAULT_DESCRIPTION
+    return defaultDescription
   }
 
   const summaryText = input.summary.slice(0, 4).join('；')
   const resultText = input.status === 'empty'
-    ? '当前没有匹配专辑。'
+    ? t('seo.resultEmpty')
     : input.totalCount > 0
-      ? `当前共找到 ${input.totalCount} 张匹配专辑。`
+      ? t('seo.resultCount', { count: input.totalCount })
       : input.status === 'error'
-        ? '当前查询失败，请稍后重试。'
-        : '正在根据已选条件查询专辑。'
+        ? t('seo.resultError')
+        : t('seo.resultLoading')
 
-  return `${summaryText ? `当前筛选：${summaryText}。` : ''}${resultText} 支持查看专辑信息、参与者字段与原曲标签。`
+  return `${summaryText ? t('seo.currentFilters', { summary: summaryText }) : ''}${resultText} ${t('seo.descriptionSuffix')}`
 }
 
 function buildStructuredData(input: SearchPageSeoInput, title: string, description: string, canonicalUrl: string, currentUrl: string): Array<Record<string, unknown>> {
   const website: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: SITE_NAME,
-    alternateName: SITE_ALT_NAME,
+    name: t('app.title'),
+    alternateName: t('app.altName'),
     url: canonicalUrl,
-    description: DEFAULT_DESCRIPTION,
-    inLanguage: 'zh-CN',
+    description: t('seo.description'),
+    inLanguage: getCurrentHtmlLang(),
     potentialAction: {
       '@type': 'SearchAction',
       target: `${canonicalUrl}?q={search_term_string}`,
@@ -106,10 +105,10 @@ function buildStructuredData(input: SearchPageSeoInput, title: string, descripti
     name: title,
     url: input.hasActiveSearch ? currentUrl : canonicalUrl,
     description,
-    inLanguage: 'zh-CN',
+    inLanguage: getCurrentHtmlLang(),
     isPartOf: {
       '@type': 'WebSite',
-      name: SITE_NAME,
+      name: t('app.title'),
       url: canonicalUrl,
     },
   }
@@ -135,6 +134,7 @@ export function createSearchPageHead(input: SearchPageSeoInput) {
   const ogImageUrl = getOgImageUrl()
   const title = buildTitle(input)
   const description = buildDescription(input)
+  const ogImageAlt = t('seo.ogImageAlt')
   const robots = input.hasActiveSearch
     ? 'noindex,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1'
     : 'index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1'
@@ -142,7 +142,7 @@ export function createSearchPageHead(input: SearchPageSeoInput) {
 
   return {
     htmlAttrs: {
-      lang: 'zh-CN',
+      lang: getCurrentHtmlLang(),
     },
     title,
     link: [
@@ -161,7 +161,7 @@ export function createSearchPageHead(input: SearchPageSeoInput) {
       {
         key: 'keywords',
         name: 'keywords',
-        content: DEFAULT_KEYWORDS,
+        content: t('seo.keywords'),
       },
       {
         key: 'robots',
@@ -191,12 +191,12 @@ export function createSearchPageHead(input: SearchPageSeoInput) {
       {
         key: 'twitter:image:alt',
         name: 'twitter:image:alt',
-        content: OG_IMAGE_ALT,
+        content: ogImageAlt,
       },
       {
         key: 'og:locale',
         property: 'og:locale',
-        content: 'zh_CN',
+        content: getCurrentOgLocale(),
       },
       {
         key: 'og:type',
@@ -206,7 +206,7 @@ export function createSearchPageHead(input: SearchPageSeoInput) {
       {
         key: 'og:site_name',
         property: 'og:site_name',
-        content: SITE_NAME,
+        content: t('app.title'),
       },
       {
         key: 'og:title',
@@ -241,7 +241,7 @@ export function createSearchPageHead(input: SearchPageSeoInput) {
       {
         key: 'og:image:alt',
         property: 'og:image:alt',
-        content: OG_IMAGE_ALT,
+        content: ogImageAlt,
       },
     ],
     script: [

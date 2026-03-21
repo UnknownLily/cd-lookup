@@ -1,11 +1,14 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import SearchTagInput from './SearchTagInput.vue'
 import { FILTER_GROUPS, isListFilter, isRangeFilter } from '../../config/filters'
-import { FIELD_LABELS, type ListFilterKey, type RangeFilterKey, type SearchCriteriaDraft } from '../../types/search'
+import { getFieldLabel, getFilterValueLabel, type ListFilterKey, type RangeFilterKey, type SearchCriteriaDraft } from '../../types/search'
 
 const props = defineProps<{
   draftCriteria: SearchCriteriaDraft
 }>()
+
+const { t } = useI18n()
 
 const emit = defineEmits<{
   updateRange: [key: RangeFilterKey, value: [number, number]]
@@ -45,8 +48,8 @@ function draftValues(key: ListFilterKey): string[] {
   <div class="filters-panel">
     <div class="filters-head">
       <div>
-        <h2>筛选面板</h2>
-        <p>调整条件后点击“应用筛选”按钮</p>
+        <h2>{{ t('filters.panelTitle') }}</h2>
+        <p>{{ t('filters.panelDescription') }}</p>
       </div>
     </div>
 
@@ -54,8 +57,8 @@ function draftValues(key: ListFilterKey): string[] {
       <v-expansion-panel v-for="group in FILTER_GROUPS" :key="group.id" elevation="0" rounded="xl">
         <v-expansion-panel-title>
           <div>
-            <div class="group-title">{{ group.title }}</div>
-            <div class="group-description">{{ group.description }}</div>
+            <div class="group-title">{{ t(group.titleKey) }}</div>
+            <div class="group-description">{{ t(group.descriptionKey) }}</div>
           </div>
         </v-expansion-panel-title>
         <v-expansion-panel-text>
@@ -64,7 +67,7 @@ function draftValues(key: ListFilterKey): string[] {
               <div v-if="isRangeFilter(filter)" class="filter-block filter-block-range">
                 <div class="filter-head">
                   <div>
-                    <h3>{{ filter.label }}</h3>
+                    <h3>{{ getFieldLabel(filter.key) }}</h3>
                     <p>{{ formatRangeLabel(draftCriteria[filter.key], filter.formatter) }}</p>
                   </div>
                 </div>
@@ -91,17 +94,17 @@ function draftValues(key: ListFilterKey): string[] {
               <div v-else-if="isListFilter(filter)" class="filter-block">
                 <div class="filter-head">
                   <div>
-                    <h3>{{ filter.label }}</h3>
-                    <p>{{ filter.hint ?? `当前已选 ${draftCriteria[filter.key].length} 项` }}</p>
+                    <h3>{{ getFieldLabel(filter.key) }}</h3>
+                    <p>{{ filter.hintKey ? t(filter.hintKey) : t('filters.selectedCount', { count: draftCriteria[filter.key].length }) }}</p>
                   </div>
                 </div>
 
                 <SearchTagInput
                   v-if="filter.type === 'taglist'"
-                  :label="FIELD_LABELS[filter.key] ?? filter.label"
+                  :label="getFieldLabel(filter.key)"
                   :items="filter.items"
                   :model-value="draftCriteria[filter.key]"
-                  :hint="filter.hint"
+                  :hint="filter.hintKey ? t(filter.hintKey) : undefined"
                   :suggestion-source="filter.suggestionSource"
                   @update:model-value="updateCombobox(filter.key, $event)"
                 />
@@ -118,7 +121,7 @@ function draftValues(key: ListFilterKey): string[] {
                     variant="outlined"
                     @click="toggleChipValue(filter.key, option)"
                   >
-                    {{ option }}
+                    {{ getFilterValueLabel(filter.key, option) }}
                   </v-chip>
                 </div>
               </div>

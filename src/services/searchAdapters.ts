@@ -1,7 +1,7 @@
 import {
-  FIELD_LABELS,
   ITEM_PROP_TYPE,
   isListFilterKey,
+  getFieldLabel,
   type DataTypeId,
   type DataValueMap,
   type ItemField,
@@ -11,6 +11,7 @@ import {
   type SearchResultItem,
   type SearchTag,
 } from '../types/search'
+import { getCurrentIntlLocale as getIntlLocale, t as translate } from '../i18n'
 
 const HIDDEN_FIELDS = new Set<ItemField | string>(['id', 'self', 'name', 'alname', 'time', 'cover'])
 const PRIMARY_TAG_FIELDS: ItemField[] = ['arrange', 'vocal', 'lyric', 'ogmusic', 'ogwork', 'work', 'property', 'rate', 'region', 'event', 'coverchar']
@@ -48,7 +49,7 @@ function formatValue(typeId: DataTypeId, value: DataValueMap[DataTypeId]): strin
     case '_num':
       return (value as DataValueMap['_num']).toString(10)
     case '_dat':
-      return new Date(value as DataValueMap['_dat']).toLocaleDateString('zh-CN')
+      return new Date(value as DataValueMap['_dat']).toLocaleDateString(getIntlLocale())
     case '_pri':
       return `${(value as DataValueMap['_pri']).value} ${(value as DataValueMap['_pri']).unit}`
     case '_dur': {
@@ -75,7 +76,7 @@ function getValues(item: RawItem, field: ItemField): string[] {
 function buildTags(field: ItemField, values: string[]): SearchTag[] {
   return values.map((value) => ({
     field,
-    label: FIELD_LABELS[field] ?? field,
+    label: getFieldLabel(field),
     value,
     filterable: isListFilterKey(field),
   }))
@@ -84,7 +85,7 @@ function buildTags(field: ItemField, values: string[]): SearchTag[] {
 function buildDetailSections(item: RawItem): SearchDetailSection[] {
   return DETAIL_FIELD_ORDER.map((field) => ({
     key: field,
-    label: FIELD_LABELS[field] ?? field,
+    label: getFieldLabel(field),
     tags: buildTags(field, getValues(item, field)),
   })).filter((section) => section.tags.length > 0)
 }
@@ -105,7 +106,7 @@ function buildLinks(item: RawItem): SearchResultLink[] {
     for (const rawValue of rawValues) {
       links.push({
         key: `${field}-${rawValue.url}`,
-        label: FIELD_LABELS[field] ?? field,
+        label: getFieldLabel(field),
         url: rawValue.url,
       })
     }
@@ -116,14 +117,14 @@ function buildLinks(item: RawItem): SearchResultLink[] {
 
 export function adaptSearchResult(item: RawItem): SearchResultItem {
   const title = item.name?.[0] ?? (item.self.displaytitle || item.self.fulltext)
-  const subtitle = getValues(item, 'circle').join(' / ') || '制作方未标注'
+  const subtitle = getValues(item, 'circle').join(' / ') || translate('searchResult.subtitleFallback')
   const aliases = getValues(item, 'alname').filter((value) => value !== title)
   const durationText = item.time?.[0] ? formatValue('_dur', item.time[0]) : null
   const coverUrl = item.cover?.[0]?.fullurl ?? null
   const meta = [
-    item.year?.[0] ? `发行 ${item.year[0]}` : null,
-    durationText ? `时长 ${durationText}` : null,
-    getValues(item, 'event')[0] ? `展会 ${getValues(item, 'event')[0]}` : null,
+    item.year?.[0] ? translate('searchResult.metaYear', { value: item.year[0] }) : null,
+    durationText ? translate('searchResult.metaDuration', { value: durationText }) : null,
+    getValues(item, 'event')[0] ? translate('searchResult.metaEvent', { value: getValues(item, 'event')[0] }) : null,
   ].filter((value): value is string => Boolean(value))
 
   return {

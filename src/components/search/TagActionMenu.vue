@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import type { SearchTag } from '../../types/search'
+import { useI18n } from 'vue-i18n'
+import { getFieldLabel, getFilterValueLabel, type SearchTag } from '../../types/search'
 
 const props = defineProps<{
   tag: SearchTag
@@ -11,6 +12,8 @@ const emit = defineEmits<{
   add: [tag: SearchTag]
   set: [tag: SearchTag]
 }>()
+
+const { t } = useI18n()
 
 const open = ref(false)
 
@@ -44,27 +47,27 @@ function setAsFilter(): void {
         variant="tonal"
         :size="compact ? 'small' : 'default'"
       >
-        {{ tag.value }}
+        {{ getFilterValueLabel(tag.field, tag.value) }}
       </v-chip>
     </template>
 
     <v-list class="tag-menu-list" min-width="220" density="compact" rounded="xl">
-      <v-list-subheader>{{ tag.label }}</v-list-subheader>
-      <v-list-item prepend-icon="$copyContent" title="复制文本" @click="copyValue" />
+      <v-list-subheader>{{ getFieldLabel(tag.field) }}</v-list-subheader>
+      <v-list-item prepend-icon="$copyContent" :title="t('actions.copyText')" @click="copyValue" />
       <v-list-item
         prepend-icon="$addFilter"
-        title="添加进筛选条件"
+        :title="t('actions.addToFilters')"
         :disabled="!tag.filterable"
         @click="addToFilter"
       />
       <v-list-item
         prepend-icon="$applyFilter"
-        title="设置为筛选条件"
+        :title="t('actions.setAsFilter')"
         :disabled="!tag.filterable"
         @click="setAsFilter"
       />
       <v-divider class="my-1" />
-      <v-list-item prepend-icon="$closeCircle" title="取消" @click="open = false" />
+      <v-list-item prepend-icon="$closeCircle" :title="t('actions.cancel')" @click="open = false" />
     </v-list>
   </v-menu>
 </template>

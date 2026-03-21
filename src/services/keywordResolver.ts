@@ -1,6 +1,7 @@
 import { FILTER_GROUPS, findFilterDefinition, isListFilter } from '../config/filters'
+import { t } from '../i18n'
 import { getTagSuggestions } from './tagSuggestions'
-import { FIELD_LABELS, cloneCriteria, normalizeTextList, type ListFilterKey, type SearchCriteriaDraft } from '../types/search'
+import { cloneCriteria, getFieldLabel, normalizeTextList, type ListFilterKey, type SearchCriteriaDraft } from '../types/search'
 
 interface KeywordMatch {
   key: ListFilterKey
@@ -15,7 +16,27 @@ export interface KeywordSuggestion {
 
 export interface KeywordResolutionResult {
   criteria: SearchCriteriaDraft
-  noticeMessage: string | null
+  noticeMessage: KeywordResolutionNotice | null
+}
+
+export interface KeywordResolutionNotice {
+  mode: 'exact' | 'loose'
+  keyword: string
+  match: KeywordMatch
+}
+
+export class KeywordResolutionError extends Error {
+  readonly kind: 'ambiguousFields' | 'ambiguousCandidates' | 'unrecognized'
+  readonly keyword: string
+  readonly matches: KeywordMatch[]
+
+  constructor(kind: 'ambiguousFields' | 'ambiguousCandidates' | 'unrecognized', keyword: string, matches: KeywordMatch[] = []) {
+    super(kind)
+    this.name = 'KeywordResolutionError'
+    this.kind = kind
+    this.keyword = keyword
+    this.matches = matches
+  }
 }
 
 const REMOTE_RESOLUTION_KEYS: ListFilterKey[] = ['circle', 'event', 'coverchar', 'ogmusic', 'ogwork', 'arrange', 'lyric', 'compose', 'vocal', 'script', 'dub']
@@ -53,13 +74,13 @@ function createResolvedCriteria(criteria: SearchCriteriaDraft, match: KeywordMat
   return nextCriteria
 }
 
-function createNoticeMessage(keyword: string, match: KeywordMatch, mode: 'exact' | 'loose'): string {
-  const fieldLabel = FIELD_LABELS[match.key] ?? match.key
-  if (mode === 'exact') {
-    return `已将关键词“${keyword.trim()}”识别为${fieldLabel}：${match.value}`
+export function formatKeywordResolutionNotice(notice: KeywordResolutionNotice): string {
+  const fieldLabel = getFieldLabel(notice.match.key)
+  if (notice.mode === 'exact') {
+    return t('keyword.exactResolved', { keyword: notice.keyword.trim(), fieldLabel, value: notice.match.value })
   }
 
-  return `已将关键词“${keyword.trim()}”补全为${fieldLabel}：${match.value}`
+  return t('keyword.looseResolved', { keyword: notice.keyword.trim(), fieldLabel, value: notice.match.value })
 }
 
 function collectStaticMatches(term: string): KeywordMatch[] {
@@ -153,22 +174,40 @@ function selectPreferredMatch(matches: KeywordMatch[]): KeywordMatch | null {
 
 function formatAmbiguousFields(matches: KeywordMatch[]): string {
   return sortMatches(dedupeMatches(matches))
-    .map((match) => FIELD_LABELS[match.key] ?? match.key)
+    .map((match) => getFieldLabel(match.key))
     .join('、')
 }
 
 function formatAmbiguousCandidates(matches: KeywordMatch[]): string {
   return sortMatches(dedupeMatches(matches))
     .slice(0, 6)
-    .map((match) => `${FIELD_LABELS[match.key] ?? match.key}：${match.value}`)
+    .map((match) => `${getFieldLabel(match.key)}：${match.value}`)
     .join('；')
+}
+
+export function formatKeywordResolutionError(error: KeywordResolutionError): string {
+  switch (error.kind) {
+    case 'ambiguousFields':
+      return t('keyword.ambiguousFields', {
+        keyword: error.keyword,
+        fields: formatAmbiguousFields(error.matches),
+        candidates: formatAmbiguousCandidates(error.matches),
+      })
+    case 'ambiguousCandidates':
+      return t('keyword.ambiguousCandidates', {
+        keyword: error.keyword,
+        candidates: formatAmbiguousCandidates(error.matches),
+      })
+    case 'unrecognized':
+      return t('keyword.unrecognized', { keyword: error.keyword })
+  }
 }
 
 function toSuggestion(match: KeywordMatch): KeywordSuggestion {
   return {
     key: match.key,
     value: match.value,
-    fieldLabel: FIELD_LABELS[match.key] ?? match.key,
+    fieldLabel: getFieldLabel(match.key),
   }
 }
 
@@ -243,12 +282,12 @@ export async function resolveKeywordCriteria(criteria: SearchCriteriaDraft, sign
   if (preferredExactMatch) {
     return {
       criteria: createResolvedCriteria(criteria, preferredExactMatch),
-      noticeMessage: createNoticeMessage(keyword, preferredExactMatch, 'exact'),
+      noticeMessage: { mode: 'exact', keyword, match: preferredExactMatch },
     }
   }
 
   if (exactMatches.length > 1) {
-    throw new Error(`关键词“${keyword}”同时匹配多个字段：${formatAmbiguousFields(exactMatches)}。候选为：${formatAmbiguousCandidates(exactMatches)}。请从下拉建议中明确选择，或直接在筛选面板中添加。`)
+    throw new KeywordResolutionError('ambiguousFields', keyword, exactMatches)
   }
 
   const looseMatches = dedupeMatches(remoteMatches.looseMatches)
@@ -256,13 +295,13 @@ export async function resolveKeywordCriteria(criteria: SearchCriteriaDraft, sign
   if (preferredLooseMatch) {
     return {
       criteria: createResolvedCriteria(criteria, preferredLooseMatch),
-      noticeMessage: createNoticeMessage(keyword, preferredLooseMatch, 'loose'),
+      noticeMessage: { mode: 'loose', keyword, match: preferredLooseMatch },
     }
   }
 
   if (looseMatches.length > 1) {
-    throw new Error(`关键词“${keyword}”存在多个候选标签：${formatAmbiguousCandidates(looseMatches)}。请从下拉建议中明确选择，或改用筛选面板中的标签输入。`)
+    throw new KeywordResolutionError('ambiguousCandidates', keyword, looseMatches)
   }
 
-  throw new Error(`关键词“${keyword}”未识别为可筛选标签。请输入制作方、发售展会、原曲、原曲出处或参与者名称，或直接在筛选面板中选择。`)
+  throw new KeywordResolutionError('unrecognized', keyword)
 }

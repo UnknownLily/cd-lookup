@@ -1,6 +1,7 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import TagActionMenu from './TagActionMenu.vue'
-import type { SearchResultItem, SearchTag } from '../../types/search'
+import { getFieldLabel, type SearchResultItem, type SearchTag } from '../../types/search'
 
 defineProps<{
   item: SearchResultItem
@@ -10,6 +11,8 @@ const emit = defineEmits<{
   addTag: [tag: SearchTag]
   setTag: [tag: SearchTag]
 }>()
+
+const { t } = useI18n()
 </script>
 
 <template>
@@ -18,7 +21,7 @@ const emit = defineEmits<{
       <div v-if="item.coverUrl" class="list-cover-frame">
         <v-img :src="item.coverUrl" :alt="item.title" class="list-cover-image" contain height="156" />
       </div>
-      <div v-else class="list-cover-fallback">暂无封面</div>
+      <div v-else class="list-cover-fallback">{{ t('app.noCover') }}</div>
     </div>
 
     <div class="list-body">
@@ -52,7 +55,7 @@ const emit = defineEmits<{
               target="_blank"
               rel="noopener noreferrer"
             >
-              前往 Wiki
+              {{ t('app.wikiAction') }}
             </v-btn>
           </div>
 
@@ -79,7 +82,7 @@ const emit = defineEmits<{
 
         <div class="dense-sections">
           <div v-for="section in item.detailSections.slice(0, 8)" :key="section.key" class="dense-section">
-            <strong>{{ section.label }}</strong>
+            <strong>{{ getFieldLabel(section.key) }}</strong>
             <div class="dense-tags">
               <TagActionMenu
                 v-for="tag in section.tags.slice(0, 4)"

@@ -1,5 +1,7 @@
 export type ViewMode = 'card' | 'list'
 
+import { t } from '../i18n'
+
 export const RANGE_FILTER_KEYS = ['establish', 'year', 'time', 'ogmusicno', 'ogworkno'] as const
 export const LIST_FILTER_KEYS = [
   'event',
@@ -195,36 +197,100 @@ export const RANGE_BOUNDS: Record<RangeFilterKey, { min: number; max: number }> 
   ogworkno: { min: 0, max: 20 },
 }
 
-export const FIELD_LABELS: Record<string, string> = {
-  establish: '成立年份',
-  year: '发行年份',
-  time: '时长',
-  ogmusicno: '使用原曲数',
-  ogworkno: '原曲出处数',
-  event: '发售展会',
-  circle: '制作方',
-  coverchar: '封面角色',
-  region: '地区',
-  work: '作品类型',
-  state: '社团状态',
-  property: '属性',
-  rate: '分级',
-  only: '仅限条件',
-  style: '风格类型',
-  ogmusic: '使用原曲',
-  ogwork: '原曲出处',
-  noth: '非东方曲',
-  original: '原创曲',
-  arrange: '编曲',
-  lyric: '作词',
-  compose: '作曲',
-  vocal: '演唱',
-  script: '剧本',
-  dub: '配音',
-  perform: '演奏',
-  official: '官网',
-  shop: '商店',
-  cover: '封面',
+const FIELD_LABEL_KEYS: Record<string, string> = {
+  establish: 'fields.establish',
+  year: 'fields.year',
+  time: 'fields.time',
+  ogmusicno: 'fields.ogmusicno',
+  ogworkno: 'fields.ogworkno',
+  event: 'fields.event',
+  circle: 'fields.circle',
+  coverchar: 'fields.coverchar',
+  region: 'fields.region',
+  work: 'fields.work',
+  state: 'fields.state',
+  property: 'fields.property',
+  rate: 'fields.rate',
+  only: 'fields.only',
+  style: 'fields.style',
+  ogmusic: 'fields.ogmusic',
+  ogwork: 'fields.ogwork',
+  noth: 'fields.noth',
+  original: 'fields.original',
+  arrange: 'fields.arrange',
+  lyric: 'fields.lyric',
+  compose: 'fields.compose',
+  vocal: 'fields.vocal',
+  script: 'fields.script',
+  dub: 'fields.dub',
+  perform: 'fields.perform',
+  official: 'fields.official',
+  shop: 'fields.shop',
+  cover: 'fields.cover',
+}
+
+const FILTER_VALUE_LABEL_KEYS: Partial<Record<ListFilterKey, Record<string, string>>> = {
+  region: {
+    日本: 'filters.options.region.日本',
+    中国: 'filters.options.region.中国',
+    台湾: 'filters.options.region.台湾',
+    香港: 'filters.options.region.香港',
+    韩国: 'filters.options.region.韩国',
+    美国: 'filters.options.region.美国',
+    英国: 'filters.options.region.英国',
+    德国: 'filters.options.region.德国',
+    加拿大: 'filters.options.region.加拿大',
+  },
+  work: {
+    同人音乐: 'filters.options.work.同人音乐',
+    同人游戏: 'filters.options.work.同人游戏',
+    同人志: 'filters.options.work.同人志',
+    同人动画: 'filters.options.work.同人动画',
+    周边: 'filters.options.work.周边',
+    其他: 'filters.options.work.其他',
+  },
+  state: {
+    活动: 'filters.options.state.活动',
+    休止: 'filters.options.state.休止',
+    解散: 'filters.options.state.解散',
+  },
+  property: {
+    单曲: 'filters.options.property.单曲',
+    Demo: 'filters.options.property.Demo',
+    合作: 'filters.options.property.合作',
+    精选集: 'filters.options.property.精选集',
+    B面: 'filters.options.property.B面',
+    盒装: 'filters.options.property.盒装',
+    Live: 'filters.options.property.Live',
+    混音集: 'filters.options.property.混音集',
+    原声集: 'filters.options.property.原声集',
+    印象集: 'filters.options.property.印象集',
+  },
+  rate: {
+    R18: 'filters.options.rate.R18',
+    R15: 'filters.options.rate.R15',
+    一般向: 'filters.options.rate.一般向',
+  },
+  noth: {
+    非东方: 'filters.options.noth.非东方',
+  },
+  original: {
+    原创: 'filters.options.original.原创',
+  },
+}
+
+export function getFieldLabel(field: string): string {
+  const key = FIELD_LABEL_KEYS[field]
+  return key ? t(key) : field
+}
+
+export function getFilterValueLabel(field: string, value: string): string {
+  if (!isListFilterKey(field)) {
+    return value
+  }
+
+  const key = FILTER_VALUE_LABEL_KEYS[field]?.[value]
+  return key ? t(key) : value
 }
 
 export function createDefaultCriteria(): SearchCriteriaDraft {
@@ -347,19 +413,24 @@ export function summarizeCriteria(criteria: SearchCriteriaDraft): string[] {
   const summary: string[] = []
 
   if (criteria.keyword.trim()) {
-    summary.push(`关键词: ${criteria.keyword.trim()}`)
+    summary.push(t('summary.keyword', { value: criteria.keyword.trim() }))
   }
 
   for (const key of RANGE_FILTER_KEYS) {
     if (!isRangeAtDefault(key, criteria[key])) {
       const [start, end] = criteria[key]
-      summary.push(`${FIELD_LABELS[key]}: ${start} - ${end}`)
+      summary.push(t('summary.range', { label: getFieldLabel(key), start, end }))
     }
   }
 
   for (const key of LIST_FILTER_KEYS) {
     if (criteria[key].length > 0) {
-      summary.push(`${FIELD_LABELS[key]}: ${criteria[key].slice(0, 2).join('、')}${criteria[key].length > 2 ? '…' : ''}`)
+      const values = criteria[key]
+        .slice(0, 2)
+        .map((value) => getFilterValueLabel(key, value))
+        .join(t('summary.separator'))
+      const suffix = criteria[key].length > 2 ? t('summary.listMoreSuffix') : ''
+      summary.push(t('summary.list', { label: getFieldLabel(key), value: `${values}${suffix}` }))
     }
   }
 

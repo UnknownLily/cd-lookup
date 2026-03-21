@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useHead } from '@unhead/vue'
 import { computed, onMounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import SearchFiltersPanel from '../components/search/SearchFiltersPanel.vue'
 import SearchResults from '../components/search/SearchResults.vue'
@@ -11,6 +12,7 @@ import { useSearchStore } from '../stores/search'
 import type { SearchTag, ViewMode } from '../types/search'
 
 const store = useSearchStore()
+const { t, locale } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const mobileFiltersOpen = ref(false)
@@ -21,7 +23,7 @@ const statusBanner = computed(() => {
     return {
       tone: 'primary' as const,
       icon: '$searchScan',
-      text: '正在按新条件查询，当前仍显示上一批成功结果。后端响应较慢，请稍候。',
+      text: t('status.refreshingDetail'),
     }
   }
 
@@ -117,6 +119,7 @@ useHead(
     totalCount: store.totalCount,
     status: store.status,
     results: store.results,
+    locale: locale.value,
   }),
 )
 </script>
@@ -189,8 +192,8 @@ useHead(
             @update-list="handleListUpdate"
           />
           <div class="drawer-actions">
-            <v-btn class="drawer-action-btn" variant="text" @click="mobileFiltersOpen = false">关闭</v-btn>
-            <v-btn class="drawer-action-btn" color="primary" :loading="store.status === 'loading'" @click="applyFilters">应用筛选</v-btn>
+            <v-btn class="drawer-action-btn" variant="text" @click="mobileFiltersOpen = false">{{ t('actions.close') }}</v-btn>
+            <v-btn class="drawer-action-btn" color="primary" :loading="store.status === 'loading'" @click="applyFilters">{{ t('actions.applyFilters') }}</v-btn>
           </div>
         </div>
       </v-navigation-drawer>

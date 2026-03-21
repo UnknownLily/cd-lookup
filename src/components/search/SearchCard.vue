@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import TagActionMenu from './TagActionMenu.vue'
-import type { SearchResultItem, SearchTag } from '../../types/search'
+import { getFieldLabel, type SearchResultItem, type SearchTag } from '../../types/search'
 
 const props = defineProps<{
   item: SearchResultItem
@@ -11,6 +12,8 @@ const emit = defineEmits<{
   addTag: [tag: SearchTag]
   setTag: [tag: SearchTag]
 }>()
+
+const { t } = useI18n()
 
 const isDarkCover = ref(false)
 let toneAnalysisToken = 0
@@ -122,7 +125,7 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
     <div class="card-cover">
       <v-img v-if="item.coverUrl" :src="item.coverUrl" :alt="item.title" class="cover-image" cover height="320" />
       <div v-else class="cover-fallback">
-        <span>暂无封面</span>
+        <span>{{ t('app.noCover') }}</span>
       </div>
     </div>
 
@@ -134,7 +137,7 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
           <h3>{{ item.title }}</h3>
           <p>{{ item.subtitle }}</p>
           <div v-if="item.aliases.length > 0" class="alias-row">
-            <span v-for="alias in item.aliases.slice(0, 2)" :key="alias">别名: {{ alias }}</span>
+            <span v-for="alias in item.aliases.slice(0, 2)" :key="alias">{{ t('app.aliasPrefix') }}{{ alias }}</span>
           </div>
           <div v-if="item.meta.length > 0" class="card-meta">
             <span v-for="line in item.meta" :key="line">{{ line }}</span>
@@ -151,7 +154,7 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
             target="_blank"
             rel="noopener noreferrer"
           >
-            前往 Wiki
+            {{ t('app.wikiAction') }}
           </v-btn>
 
           <v-btn
@@ -172,7 +175,7 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
 
       <div class="detail-list">
         <div v-for="section in item.detailSections.slice(0, 6)" :key="section.key" class="detail-section">
-          <div class="detail-label">{{ section.label }}</div>
+          <div class="detail-label">{{ getFieldLabel(section.key) }}</div>
           <div class="tag-row">
             <TagActionMenu
               v-for="tag in section.tags.slice(0, 4)"

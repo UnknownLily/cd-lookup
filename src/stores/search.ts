@@ -3,13 +3,20 @@ import { defineStore } from 'pinia'
 import type { LocationQuery } from 'vue-router'
 import { fetchSearchPage } from '../services/searchApi'
 import { adaptSearchResult } from '../services/searchAdapters'
-import { resolveKeywordCriteria } from '../services/keywordResolver'
+import {
+  KeywordResolutionError,
+  formatKeywordResolutionError,
+  formatKeywordResolutionNotice,
+  resolveKeywordCriteria,
+  type KeywordResolutionNotice,
+} from '../services/keywordResolver'
 import { buildSearchRouteQuery, parseSearchRouteQuery } from '../services/searchRoute'
 import {
-  FIELD_LABELS,
   LIST_FILTER_KEYS,
+  type RawItem,
   cloneCriteria,
   createDefaultCriteria,
+  getFieldLabel,
   hasActiveCriteria,
   isListFilterKey,
   normalizeTextList,
@@ -22,33 +29,81 @@ import {
   type SearchTag,
   type ViewMode,
 } from '../types/search'
+import { LocalizedError, createMessage, currentLocale, resolveMessage, type MessageDescriptor, type MessageLike } from '../i18n'
 
 const PAGE_SIZE = 24
 const QUICK_TAG_KEYS: ListFilterKey[] = [...LIST_FILTER_KEYS]
 
-function normalizeError(error: unknown): string {
+type SearchMessage = MessageLike | KeywordResolutionError | { key: string; params?: Record<string, SearchMessage | number | boolean | null | undefined> }
+
+function resolveSearchMessage(message: SearchMessage): string | null {
+  currentLocale.value
+
+  if (message == null) {
+    return null
+  }
+
+  if (message instanceof KeywordResolutionError) {
+    return formatKeywordResolutionError(message)
+  }
+
+  if (typeof message === 'string') {
+    return message
+  }
+
+  if ('key' in message) {
+    const resolvedParams = message.params
+      ? Object.fromEntries(
+          Object.entries(message.params).map(([key, value]) => [
+            key,
+            value instanceof KeywordResolutionError || (value && typeof value === 'object' && 'key' in value)
+              ? resolveSearchMessage(value as SearchMessage) ?? ''
+              : value,
+          ]),
+        )
+      : undefined
+
+    return resolveMessage({ key: message.key, params: resolvedParams as Record<string, MessageDescriptor> | undefined })
+  }
+
+  return null
+}
+
+function isMessageKey(message: SearchMessage, key: string): boolean {
+  return Boolean(message && typeof message === 'object' && 'key' in message && message.key === key)
+}
+
+function normalizeError(error: unknown): SearchMessage {
   if (error instanceof DOMException && error.name === 'AbortError') {
-    return '查询已取消'
+    return createMessage('errors.requestCancelled')
+  }
+
+  if (error instanceof KeywordResolutionError) {
+    return error
+  }
+
+  if (error instanceof LocalizedError) {
+    return error.descriptor
   }
 
   if (error instanceof Error) {
     return error.message
   }
 
-  return '请求失败，请稍后重试。'
+  return createMessage('errors.requestFailed')
 }
 
 export const useSearchStore = defineStore('search', () => {
   const draftCriteria = ref<SearchCriteriaDraft>(createDefaultCriteria())
   const appliedCriteria = ref<SearchCriteriaDraft>(createDefaultCriteria())
   const viewMode = ref<ViewMode>('card')
-  const results = ref<SearchResultItem[]>([])
+  const rawResults = ref<RawItem[]>([])
   const status = ref<SearchStatus>('idle')
   const totalCount = ref(0)
   const nextOffset = ref(0)
   const more = ref(false)
-  const errorMessage = ref<string | null>(null)
-  const noticeMessage = ref<string | null>(null)
+  const errorState = ref<SearchMessage>(null)
+  const noticeState = ref<KeywordResolutionNotice | null>(null)
   const activeRequestId = ref(0)
   const hasBootstrapped = ref(false)
   const activeController = shallowRef<AbortController | null>(null)
@@ -62,26 +117,39 @@ export const useSearchStore = defineStore('search', () => {
   const isRefreshing = computed(() => status.value === 'loading' && results.value.length > 0)
   const isLoadingMore = computed(() => status.value === 'loadingMore')
   const routeQuery = computed(() => buildSearchRouteQuery(appliedCriteria.value, viewMode.value))
-  const appliedSummary = computed(() => summarizeCriteria(appliedCriteria.value))
-  const quickTags = computed<SearchTag[]>(() =>
-    QUICK_TAG_KEYS.flatMap((key) =>
+  const errorMessage = computed(() => resolveSearchMessage(errorState.value))
+  const noticeMessage = computed(() => {
+    currentLocale.value
+    return noticeState.value ? formatKeywordResolutionNotice(noticeState.value) : null
+  })
+  const appliedSummary = computed(() => {
+    currentLocale.value
+    return summarizeCriteria(appliedCriteria.value)
+  })
+  const results = computed<SearchResultItem[]>(() => {
+    currentLocale.value
+    return rawResults.value.map(adaptSearchResult)
+  })
+  const quickTags = computed<SearchTag[]>(() => {
+    currentLocale.value
+    return QUICK_TAG_KEYS.flatMap((key) =>
       draftCriteria.value[key].map((value) => ({
         field: key,
-        label: FIELD_LABELS[key] ?? key,
+        label: getFieldLabel(key),
         value,
         filterable: true,
       })),
-    ),
-  )
+    )
+  })
 
   function resetResults(): void {
     status.value = 'idle'
     totalCount.value = 0
     nextOffset.value = 0
     more.value = false
-    results.value = []
-    errorMessage.value = null
-    noticeMessage.value = null
+    rawResults.value = []
+    errorState.value = null
+    noticeState.value = null
     effectiveCriteria.value = createDefaultCriteria()
   }
 
@@ -138,8 +206,8 @@ export const useSearchStore = defineStore('search', () => {
     const submittedSignature = JSON.stringify(buildSearchRouteQuery(criteria, viewMode.value))
 
     status.value = 'loading'
-    errorMessage.value = null
-    noticeMessage.value = null
+    errorState.value = null
+    noticeState.value = null
     nextOffset.value = 0
     more.value = false
 
@@ -150,7 +218,7 @@ export const useSearchStore = defineStore('search', () => {
       }
 
       effectiveCriteria.value = cloneCriteria(resolution.criteria)
-      noticeMessage.value = resolution.noticeMessage
+      noticeState.value = resolution.noticeMessage
 
       const response = await fetchSearchPage(resolution.criteria, { limit: PAGE_SIZE, offset: 0, signal: controller.signal })
       if (activeRequestId.value !== requestId) {
@@ -162,13 +230,12 @@ export const useSearchStore = defineStore('search', () => {
         draftCriteria.value = cloneCriteria(resolution.criteria)
       }
 
-      const adapted = response.results.map(adaptSearchResult)
-      results.value = adapted
+      rawResults.value = response.results
       totalCount.value = response.count
-      nextOffset.value = adapted.length
+      nextOffset.value = response.results.length
       more.value = response.more
-      status.value = adapted.length > 0 ? 'success' : 'empty'
-      errorMessage.value = null
+      status.value = response.results.length > 0 ? 'success' : 'empty'
+      errorState.value = null
     } catch (error) {
       if (activeRequestId.value !== requestId) {
         return
@@ -177,16 +244,16 @@ export const useSearchStore = defineStore('search', () => {
       const message = normalizeError(error)
       if (hadResults) {
         status.value = 'success'
-        errorMessage.value = `新查询失败，当前仍显示上一次成功结果。${message}`
-      } else if (message === '查询已取消') {
+        errorState.value = { key: 'errors.refreshFailed', params: { message } }
+      } else if (isMessageKey(message, 'errors.requestCancelled')) {
         status.value = 'idle'
-        errorMessage.value = null
+        errorState.value = null
       } else {
         status.value = 'error'
-        results.value = []
+        rawResults.value = []
         totalCount.value = 0
-        errorMessage.value = message
-        noticeMessage.value = null
+        errorState.value = message
+        noticeState.value = null
       }
     } finally {
       if (activeRequestId.value === requestId) {
@@ -207,7 +274,7 @@ export const useSearchStore = defineStore('search', () => {
     const controller = new AbortController()
     activeController.value = controller
     status.value = 'loadingMore'
-    errorMessage.value = null
+    errorState.value = null
 
     try {
       const response = await fetchSearchPage(effectiveCriteria.value, {
@@ -219,7 +286,7 @@ export const useSearchStore = defineStore('search', () => {
         return
       }
 
-      results.value = [...results.value, ...response.results.map(adaptSearchResult)]
+      rawResults.value = [...rawResults.value, ...response.results]
       totalCount.value = response.count
       nextOffset.value += response.results.length
       more.value = response.more
@@ -231,7 +298,7 @@ export const useSearchStore = defineStore('search', () => {
 
       const message = normalizeError(error)
       status.value = results.value.length > 0 ? 'success' : 'error'
-      errorMessage.value = message === '查询已取消' ? null : `加载更多失败。${message}`
+      errorState.value = isMessageKey(message, 'errors.requestCancelled') ? null : { key: 'errors.loadMoreFailed', params: { message } }
     } finally {
       if (activeRequestId.value === requestId) {
         activeController.value = null
