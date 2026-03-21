@@ -271,7 +271,9 @@ const emit = defineEmits<{
   --top-primary-pill-fg: rgb(var(--v-theme-primary));
   --top-primary-pill-border: rgba(var(--v-theme-primary), 0.22);
   --top-primary-pill-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.34), 0 8px 18px rgba(92, 52, 68, 0.08);
-  background: linear-gradient(180deg, var(--surface-panel-strong), var(--surface-panel-soft));
+  background:
+    radial-gradient(circle at top right, rgba(var(--v-theme-primary), 0.035), transparent 32%),
+    linear-gradient(180deg, rgb(255, 253, 254) 0%, rgb(252, 248, 251) 100%) !important;
   border: 1px solid var(--theme-border-soft);
   box-shadow: var(--shadow-elevated);
   padding: 24px;
@@ -292,10 +294,25 @@ const emit = defineEmits<{
 
 .keyword-input :deep(.v-field) {
   border-radius: var(--search-input-radius);
+  background: linear-gradient(180deg, rgb(255, 253, 254) 0%, rgb(252, 248, 251) 100%) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.72),
+    0 8px 18px rgba(92, 52, 68, 0.06);
+}
+
+.keyword-input :deep(.v-field__field),
+.keyword-input :deep(.v-field__input),
+.keyword-input :deep(.v-field__prepend-inner),
+.keyword-input :deep(.v-field__append-inner) {
+  background: transparent !important;
 }
 
 .keyword-input :deep(.v-field__outline) {
   --v-field-border-radius: var(--search-input-radius);
+}
+
+.keyword-input :deep(.v-field__overlay) {
+  background: transparent;
 }
 
 .keyword-input :deep(.v-field__input) {
@@ -340,15 +357,18 @@ const emit = defineEmits<{
   border: 1px solid var(--theme-border-soft);
   box-shadow: 0 20px 40px rgba(56, 44, 34, 0.12);
   overflow: hidden;
+  background: linear-gradient(180deg, rgb(255, 253, 254) 0%, rgb(252, 248, 251) 100%) !important;
 }
 
 .keyword-list {
   padding: 8px;
+  background: transparent !important;
 }
 
 .keyword-tip {
   padding: 12px 16px 10px;
   border-bottom: 1px solid var(--theme-border-soft);
+  background: transparent !important;
 }
 
 .keyword-tip-head {
