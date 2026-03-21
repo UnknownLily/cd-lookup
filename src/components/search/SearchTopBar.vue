@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import type { ViewMode } from '../../types/search'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { getKeywordSuggestions, type KeywordSuggestion } from '../../services/keywordResolver'
+import type { SearchTag, ViewMode } from '../../types/search'
 
 const props = defineProps<{
   keyword: string
+  quickTags: SearchTag[]
   viewMode: ViewMode
   summary: string[]
   totalCount: number
@@ -25,11 +27,103 @@ const statusBadgeText = computed(() => {
   return ''
 })
 
+const selectedSuggestionItems = computed<KeywordSuggestion[]>(() =>
+  props.quickTags.map((tag) => ({
+    key: tag.field as KeywordSuggestion['key'],
+    value: tag.value,
+    fieldLabel: tag.label,
+  })),
+)
+
+const suggestionItems = ref<KeywordSuggestion[]>([])
+const suggestionLoading = ref(false)
+const suggestionHint = ref('输入已知标签后可直接选择建议项。')
+const suggestionMenuOpen = ref(false)
+let debounceTimer: ReturnType<typeof setTimeout> | null = null
+let currentController: AbortController | null = null
+
+async function loadSuggestions(term: string): Promise<void> {
+  currentController?.abort()
+
+  if (!term.trim()) {
+    suggestionItems.value = []
+    suggestionHint.value = '输入制作方、发售展会或封面角色后，可直接从下拉建议中选择。'
+    suggestionLoading.value = false
+    suggestionMenuOpen.value = false
+    return
+  }
+
+  currentController = new AbortController()
+  suggestionLoading.value = true
+  suggestionHint.value = '正在加载自动归类建议…'
+
+  try {
+    suggestionItems.value = await getKeywordSuggestions(term, currentController.signal)
+    suggestionMenuOpen.value = suggestionItems.value.length > 0
+    suggestionHint.value = suggestionItems.value.length > 0
+      ? '建议项会显示它将归入的筛选字段。'
+      : '没有找到建议项，你仍可直接输入后再应用。'
+  } catch (error) {
+    if (!(error instanceof DOMException && error.name === 'AbortError')) {
+      suggestionItems.value = []
+      suggestionHint.value = '建议接口暂不可用，可继续直接输入。'
+      suggestionMenuOpen.value = false
+    }
+  } finally {
+    suggestionLoading.value = false
+  }
+}
+
+watch(
+  () => props.keyword,
+  (term) => {
+    if (debounceTimer) {
+      clearTimeout(debounceTimer)
+    }
+
+    debounceTimer = setTimeout(() => {
+      void loadSuggestions(term)
+    }, 250)
+  },
+  { immediate: true },
+)
+
+function handleKeywordInput(value: unknown): void {
+  emit('updateKeyword', String(value ?? ''))
+}
+
+function handleSuggestionPick(item: KeywordSuggestion): void {
+  suggestionMenuOpen.value = false
+  emit('addQuickTag', {
+    field: item.key,
+    label: item.fieldLabel,
+    value: item.value,
+    filterable: true,
+  })
+  emit('updateKeyword', '')
+}
+
+function handleKeywordFocus(): void {
+  if (props.keyword.trim() && suggestionItems.value.length > 0) {
+    suggestionMenuOpen.value = true
+  }
+}
+
+onBeforeUnmount(() => {
+  if (debounceTimer) {
+    clearTimeout(debounceTimer)
+  }
+
+  currentController?.abort()
+})
+
 const emit = defineEmits<{
   updateKeyword: [value: string]
   apply: []
   clear: []
   openFilters: []
+  addQuickTag: [tag: SearchTag]
+  removeQuickTag: [tag: SearchTag]
   updateViewMode: [mode: ViewMode]
 }>()
 </script>
@@ -40,21 +134,89 @@ const emit = defineEmits<{
       <div class="top-search">
         <div class="intro-copy">
           <span class="eyebrow">THB Music Lookup</span>
-          <h1>慢查询友好的音乐检索界面</h1>
-          <p>默认保留上一批结果，等待新查询返回，避免因为后端缓慢而让页面看起来失去响应。</p>
+          <h1>同人音乐专辑查询</h1>
+          <p>本页面直接于<a href="https://thwiki.cc/%E5%90%8C%E4%BA%BA%E9%9F%B3%E4%B9%90%E4%B8%93%E8%BE%91%E6%9F%A5%E8%AF%A2" target="_blank" rel="noopener noreferrer">THBWiki的对应词条</a>中获取，并自动生成</p>
         </div>
 
-        <v-text-field
-          class="keyword-input"
-          rounded="xl"
-          :model-value="keyword"
-          label="关键词"
-          placeholder="输入标题、社团或你想找的线索"
-          prepend-inner-icon="mdi-magnify"
-          clearable
-          @update:model-value="emit('updateKeyword', String($event ?? ''))"
-          @keyup.enter="emit('apply')"
-        />
+        <v-menu
+          v-model="suggestionMenuOpen"
+          :close-on-content-click="false"
+          :open-on-click="false"
+          :open-on-focus="false"
+          location="bottom"
+          offset="10"
+        >
+          <template #activator="{ props: menuProps }">
+            <v-text-field
+              v-bind="menuProps"
+              class="keyword-input"
+              rounded="xl"
+              :model-value="keyword"
+              :hint="suggestionHint"
+              persistent-hint
+              label="快捷标签"
+              placeholder="输入制作方、发售展会或封面角色，应用时会自动归入筛选"
+              prepend-inner-icon="mdi-magnify"
+              clearable
+              @update:model-value="handleKeywordInput"
+              @focus="handleKeywordFocus"
+              @click:clear="emit('updateKeyword', '')"
+              @keyup.enter="emit('apply')"
+            >
+              <template #append-inner>
+                <div class="keyword-actions">
+                  <v-progress-circular
+                    v-if="suggestionLoading"
+                    size="18"
+                    width="2"
+                    indeterminate
+                    color="primary"
+                  />
+                  <v-btn
+                    variant="text"
+                    density="comfortable"
+                    icon="mdi-chevron-down"
+                    class="keyword-toggle"
+                    @click.stop="suggestionMenuOpen = !suggestionMenuOpen"
+                  />
+                </div>
+              </template>
+            </v-text-field>
+          </template>
+
+          <v-card class="keyword-menu" rounded="xl" variant="flat">
+            <div class="keyword-tip">
+              <div class="keyword-tip-head">
+                <div class="keyword-tip-title">自动归类建议</div>
+                <span class="keyword-tip-badge">单次正式查询</span>
+              </div>
+              <div class="keyword-tip-text">下拉项会显示这个词会被归入哪个筛选字段，确认后再应用即可。</div>
+            </div>
+
+            <v-list class="keyword-list" density="comfortable">
+              <v-list-item
+                v-for="item in suggestionItems"
+                :key="`${item.key}-${item.value}`"
+                :title="item.value"
+                :subtitle="item.fieldLabel"
+                @click="handleSuggestionPick(item)"
+              />
+            </v-list>
+          </v-card>
+        </v-menu>
+
+        <div v-if="selectedSuggestionItems.length > 0" class="quick-tags-row">
+          <v-chip
+            v-for="item in selectedSuggestionItems"
+            :key="`${item.key}-${item.value}`"
+            size="small"
+            closable
+            class="quick-tag-chip"
+            @click:close="emit('removeQuickTag', { field: item.key, label: item.fieldLabel, value: item.value, filterable: true })"
+          >
+            {{ `${item.fieldLabel}：${item.value}` }}
+          </v-chip>
+        </div>
       </div>
 
       <div class="top-actions">
@@ -131,6 +293,84 @@ const emit = defineEmits<{
   min-height: 56px;
   padding-top: 10px;
   padding-bottom: 10px;
+}
+
+.keyword-input :deep(.v-field__append-inner) {
+  align-self: center;
+  padding-top: 0;
+}
+
+.quick-tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.quick-tag-chip {
+  max-width: min(240px, 32vw);
+}
+
+.quick-tag-chip :deep(.v-chip__content) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.keyword-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.keyword-toggle {
+  margin-inline-end: -6px;
+}
+
+.keyword-menu {
+  width: min(720px, calc(100vw - 48px));
+  border: 1px solid rgba(130, 104, 76, 0.12);
+  box-shadow: 0 20px 40px rgba(56, 44, 34, 0.12);
+  overflow: hidden;
+}
+
+.keyword-list {
+  padding: 8px;
+}
+
+.keyword-tip {
+  padding: 12px 16px 10px;
+  border-bottom: 1px solid rgba(130, 104, 76, 0.12);
+}
+
+.keyword-tip-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.keyword-tip-title {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: rgba(31, 45, 51, 0.82);
+}
+
+.keyword-tip-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(70, 106, 116, 0.12);
+  color: #466a74;
+  font-size: 0.76rem;
+  white-space: nowrap;
+}
+
+.keyword-tip-text {
+  margin-top: 4px;
+  font-size: 0.82rem;
+  color: rgba(31, 45, 51, 0.58);
 }
 
 .top-action-btn,

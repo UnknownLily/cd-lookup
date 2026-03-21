@@ -28,6 +28,13 @@ const statusBanner = computed(() => {
     }
   }
 
+  if (store.noticeMessage) {
+    return {
+      type: 'info' as const,
+      text: store.noticeMessage,
+    }
+  }
+
   return null
 })
 
@@ -58,6 +65,15 @@ function handleTagAdd(tag: SearchTag): void {
 
 function handleTagSet(tag: SearchTag): void {
   store.addTagToDraft(tag.field, tag.value, true)
+}
+
+function handleQuickTagAdd(tag: SearchTag): void {
+  store.addTagToDraft(tag.field, tag.value, false)
+  store.updateKeyword('')
+}
+
+function handleQuickTagRemove(tag: SearchTag): void {
+  store.removeTagFromDraft(tag.field, tag.value)
 }
 
 function handleRangeUpdate(key: Parameters<typeof store.updateRangeFilter>[0], value: Parameters<typeof store.updateRangeFilter>[1]): void {
@@ -95,6 +111,7 @@ watch(
       <div class="page-shell">
         <SearchTopBar
           :keyword="store.draftCriteria.keyword"
+          :quick-tags="store.quickTags"
           :view-mode="store.viewMode"
           :summary="store.appliedSummary"
           :total-count="store.totalCount"
@@ -106,6 +123,8 @@ watch(
           @apply="applyFilters"
           @clear="clearFilters"
           @open-filters="mobileFiltersOpen = true"
+          @add-quick-tag="handleQuickTagAdd"
+          @remove-quick-tag="handleQuickTagRemove"
           @update-view-mode="updateViewMode"
         />
 

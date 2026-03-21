@@ -3,8 +3,10 @@ import { defineStore } from 'pinia'
 import type { LocationQuery } from 'vue-router'
 import { fetchSearchPage } from '../services/searchApi'
 import { adaptSearchResult } from '../services/searchAdapters'
+import { resolveKeywordCriteria } from '../services/keywordResolver'
 import { buildSearchRouteQuery, parseSearchRouteQuery } from '../services/searchRoute'
 import {
+  FIELD_LABELS,
   cloneCriteria,
   createDefaultCriteria,
   hasActiveCriteria,
@@ -16,10 +18,12 @@ import {
   type SearchCriteriaDraft,
   type SearchResultItem,
   type SearchStatus,
+  type SearchTag,
   type ViewMode,
 } from '../types/search'
 
 const PAGE_SIZE = 24
+const QUICK_TAG_KEYS: ListFilterKey[] = ['circle', 'event', 'coverchar']
 
 function normalizeError(error: unknown): string {
   if (error instanceof DOMException && error.name === 'AbortError') {
@@ -43,9 +47,11 @@ export const useSearchStore = defineStore('search', () => {
   const nextOffset = ref(0)
   const more = ref(false)
   const errorMessage = ref<string | null>(null)
+  const noticeMessage = ref<string | null>(null)
   const activeRequestId = ref(0)
   const hasBootstrapped = ref(false)
   const activeController = shallowRef<AbortController | null>(null)
+  const effectiveCriteria = ref<SearchCriteriaDraft>(createDefaultCriteria())
 
   const canSearch = computed(() => hasActiveCriteria(draftCriteria.value))
   const hasPendingChanges = computed(
@@ -56,6 +62,16 @@ export const useSearchStore = defineStore('search', () => {
   const isLoadingMore = computed(() => status.value === 'loadingMore')
   const routeQuery = computed(() => buildSearchRouteQuery(appliedCriteria.value, viewMode.value))
   const appliedSummary = computed(() => summarizeCriteria(appliedCriteria.value))
+  const quickTags = computed<SearchTag[]>(() =>
+    QUICK_TAG_KEYS.flatMap((key) =>
+      draftCriteria.value[key].map((value) => ({
+        field: key,
+        label: FIELD_LABELS[key] ?? key,
+        value,
+        filterable: true,
+      })),
+    ),
+  )
 
   function resetResults(): void {
     status.value = 'idle'
@@ -64,6 +80,8 @@ export const useSearchStore = defineStore('search', () => {
     more.value = false
     results.value = []
     errorMessage.value = null
+    noticeMessage.value = null
+    effectiveCriteria.value = createDefaultCriteria()
   }
 
   function cancelActiveRequest(): void {
@@ -99,6 +117,15 @@ export const useSearchStore = defineStore('search', () => {
     return true
   }
 
+  function removeTagFromDraft(field: string, value: string): boolean {
+    if (!isListFilterKey(field)) {
+      return false
+    }
+
+    draftCriteria.value[field] = draftCriteria.value[field].filter((item) => item !== value)
+    return true
+  }
+
   async function runSearch(criteria: SearchCriteriaDraft): Promise<void> {
     const requestId = activeRequestId.value + 1
     activeRequestId.value = requestId
@@ -107,16 +134,31 @@ export const useSearchStore = defineStore('search', () => {
     const controller = new AbortController()
     activeController.value = controller
     const hadResults = results.value.length > 0
+    const submittedSignature = JSON.stringify(buildSearchRouteQuery(criteria, viewMode.value))
 
     status.value = 'loading'
     errorMessage.value = null
+    noticeMessage.value = null
     nextOffset.value = 0
     more.value = false
 
     try {
-      const response = await fetchSearchPage(criteria, { limit: PAGE_SIZE, offset: 0, signal: controller.signal })
+      const resolution = await resolveKeywordCriteria(criteria, controller.signal)
       if (activeRequestId.value !== requestId) {
         return
+      }
+
+      effectiveCriteria.value = cloneCriteria(resolution.criteria)
+      noticeMessage.value = resolution.noticeMessage
+
+      const response = await fetchSearchPage(resolution.criteria, { limit: PAGE_SIZE, offset: 0, signal: controller.signal })
+      if (activeRequestId.value !== requestId) {
+        return
+      }
+
+      appliedCriteria.value = cloneCriteria(resolution.criteria)
+      if (JSON.stringify(buildSearchRouteQuery(draftCriteria.value, viewMode.value)) === submittedSignature) {
+        draftCriteria.value = cloneCriteria(resolution.criteria)
       }
 
       const adapted = response.results.map(adaptSearchResult)
@@ -143,6 +185,7 @@ export const useSearchStore = defineStore('search', () => {
         results.value = []
         totalCount.value = 0
         errorMessage.value = message
+        noticeMessage.value = null
       }
     } finally {
       if (activeRequestId.value === requestId) {
@@ -152,7 +195,7 @@ export const useSearchStore = defineStore('search', () => {
   }
 
   async function loadMore(): Promise<void> {
-    if (!more.value || status.value === 'loadingMore' || status.value === 'loading' || !hasActiveCriteria(appliedCriteria.value)) {
+    if (!more.value || status.value === 'loadingMore' || status.value === 'loading' || !hasActiveCriteria(effectiveCriteria.value)) {
       return
     }
 
@@ -166,7 +209,7 @@ export const useSearchStore = defineStore('search', () => {
     errorMessage.value = null
 
     try {
-      const response = await fetchSearchPage(appliedCriteria.value, {
+      const response = await fetchSearchPage(effectiveCriteria.value, {
         limit: PAGE_SIZE,
         offset: nextOffset.value,
         signal: controller.signal,
@@ -238,6 +281,7 @@ export const useSearchStore = defineStore('search', () => {
     totalCount,
     more,
     errorMessage,
+    noticeMessage,
     hasBootstrapped,
     canSearch,
     hasPendingChanges,
@@ -246,11 +290,13 @@ export const useSearchStore = defineStore('search', () => {
     isLoadingMore,
     routeQuery,
     appliedSummary,
+    quickTags,
     updateKeyword,
     updateRangeFilter,
     updateListFilter,
     setViewMode,
     addTagToDraft,
+    removeTagFromDraft,
     loadMore,
     applyDraft,
     clearAll,
