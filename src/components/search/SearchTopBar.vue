@@ -237,10 +237,9 @@ const emit = defineEmits<{
           筛选
         </v-btn>
 
-        <v-btn class="top-action-btn apply-action-btn" color="primary" :loading="isLoading" :disabled="!canSearch" @click="emit('apply')">
-          应用筛选
-        </v-btn>
-        <v-btn class="top-action-btn" variant="text" @click="emit('clear')">清空</v-btn>
+        <div class="status-pill-slot top-status-pill-slot">
+          <span class="pending-pill" :class="{ 'pending-pill-hidden': !statusBadgeText }">{{ statusBadgeText || '占位状态文案' }}</span>
+        </div>
       </div>
     </div>
 
@@ -254,8 +253,11 @@ const emit = defineEmits<{
 
       <div class="status-panel">
         <span class="meta-text">{{ totalCount > 0 ? `当前总结果数 ${totalCount}` : '应用条件后开始查询' }}</span>
-        <div class="status-pill-slot">
-          <span class="pending-pill" :class="{ 'pending-pill-hidden': !statusBadgeText }">{{ statusBadgeText || '占位状态文案' }}</span>
+        <div class="status-actions">
+          <v-btn class="top-action-btn apply-action-btn" color="primary" :loading="isLoading" :disabled="!canSearch" @click="emit('apply')">
+            应用筛选
+          </v-btn>
+          <v-btn class="top-action-btn" variant="text" @click="emit('clear')">清空筛选</v-btn>
         </div>
       </div>
     </div>
@@ -264,6 +266,11 @@ const emit = defineEmits<{
 
 <style scoped>
 .top-bar {
+  --top-primary-pill-bg: rgba(var(--v-theme-primary), 0.16);
+  --top-primary-pill-bg-hover: rgba(var(--v-theme-primary), 0.22);
+  --top-primary-pill-fg: rgb(var(--v-theme-primary));
+  --top-primary-pill-border: rgba(var(--v-theme-primary), 0.22);
+  --top-primary-pill-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.34), 0 8px 18px rgba(92, 52, 68, 0.08);
   background: linear-gradient(180deg, var(--surface-panel-strong), var(--surface-panel-soft));
   border: 1px solid var(--theme-border-soft);
   box-shadow: var(--shadow-elevated);
@@ -380,15 +387,35 @@ const emit = defineEmits<{
   border-radius: var(--search-control-radius);
 }
 
+.apply-action-btn {
+  color: rgb(255, 250, 252) !important;
+  background: rgb(var(--v-theme-primary)) !important;
+  border: 1px solid rgba(var(--v-theme-primary), 0.96);
+  box-shadow: 0 10px 22px rgba(92, 52, 68, 0.22);
+}
+
+.apply-action-btn:hover,
+.apply-action-btn:focus-visible {
+  background: rgba(var(--v-theme-primary), 0.9) !important;
+  border-color: rgba(var(--v-theme-primary), 0.98);
+  box-shadow: 0 14px 28px rgba(92, 52, 68, 0.28);
+}
+
+.apply-action-btn :deep(.v-btn__content),
+.apply-action-btn :deep(.v-icon) {
+  color: inherit;
+}
+
 .top-action-btn :deep(.v-btn__overlay),
 .top-action-btn :deep(.v-btn__underlay) {
   border-radius: inherit;
 }
 
 .apply-action-btn.v-btn--disabled {
-  background-color: rgba(var(--v-theme-primary), 0.12) !important;
-  color: rgba(79, 34, 48, 0.38) !important;
-  box-shadow: none !important;
+  background-color: rgba(var(--v-theme-primary), 0.46) !important;
+  color: rgba(255, 248, 250, 0.82) !important;
+  border-color: rgba(var(--v-theme-primary), 0.42) !important;
+  box-shadow: 0 6px 14px rgba(92, 52, 68, 0.12) !important;
   opacity: 1 !important;
 }
 
@@ -454,11 +481,14 @@ const emit = defineEmits<{
 
 .eyebrow {
   display: inline-block;
-  padding: 4px 10px;
-  border-radius: 999px;
-  background: var(--theme-fill-secondary);
-  color: rgb(var(--v-theme-secondary));
+  padding: 5px 12px;
+  border-radius: var(--search-control-radius);
+  background: var(--top-primary-pill-bg);
+  color: var(--top-primary-pill-fg);
+  border: 1px solid var(--top-primary-pill-border);
+  box-shadow: var(--top-primary-pill-shadow);
   font-size: 0.82rem;
+  font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -471,6 +501,10 @@ const emit = defineEmits<{
   flex-wrap: nowrap;
   justify-content: end;
   min-height: 2.75rem;
+}
+
+.top-status-pill-slot {
+  min-width: 0;
 }
 
 .top-meta {
@@ -499,6 +533,13 @@ const emit = defineEmits<{
   flex-wrap: nowrap;
 }
 
+.status-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: nowrap;
+}
+
 .meta-text {
   color: var(--text-muted);
   font-size: 0.92rem;
@@ -515,9 +556,11 @@ const emit = defineEmits<{
   display: inline-flex;
   align-items: center;
   padding: 6px 12px;
-  border-radius: 999px;
-  background: var(--theme-fill-soft);
-  color: rgb(var(--v-theme-primary));
+  border-radius: var(--search-control-radius);
+  background: var(--top-primary-pill-bg);
+  color: var(--top-primary-pill-fg);
+  border: 1px solid var(--top-primary-pill-border);
+  box-shadow: var(--top-primary-pill-shadow);
   font-size: 0.88rem;
   white-space: nowrap;
 }
@@ -560,6 +603,10 @@ const emit = defineEmits<{
   }
 
   .status-panel {
+    flex-wrap: wrap;
+  }
+
+  .status-actions {
     flex-wrap: wrap;
   }
 
