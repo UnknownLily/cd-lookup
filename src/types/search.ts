@@ -84,7 +84,7 @@ export interface SearchResultItem {
   id: string
   title: string
   subtitle: string
-  aliases: string[]
+  albumNames: string[]
   wikiUrl: string
   coverUrl: string | null
   durationText: string | null

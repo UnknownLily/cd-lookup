@@ -136,8 +136,8 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
         <div class="card-heading">
           <h3>{{ item.title }}</h3>
           <p>{{ item.subtitle }}</p>
-          <div v-if="item.aliases.length > 0" class="alias-row">
-            <span v-for="alias in item.aliases.slice(0, 2)" :key="alias">{{ t('app.aliasPrefix') }}{{ alias }}</span>
+          <div v-if="item.albumNames.length > 0" class="album-name-row">
+            <span v-for="albumName in item.albumNames.slice(0, 2)" :key="albumName">{{ t('app.albumNamePrefix') }}{{ albumName }}</span>
           </div>
           <div v-if="item.meta.length > 0" class="card-meta">
             <span v-for="line in item.meta" :key="line">{{ line }}</span>
@@ -469,7 +469,7 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
   text-shadow: var(--card-summary-text-shadow);
 }
 
-.alias-row {
+.album-name-row {
   display: flex;
   flex-wrap: wrap;
   gap: 8px 12px;

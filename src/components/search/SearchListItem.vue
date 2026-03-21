@@ -41,8 +41,8 @@ const { t } = useI18n()
             <div>
               <h3>{{ item.title }}</h3>
               <p>{{ item.subtitle }}</p>
-              <div v-if="item.aliases.length > 0" class="list-aliases">
-                <span v-for="alias in item.aliases.slice(0, 3)" :key="alias">{{ alias }}</span>
+              <div v-if="item.albumNames.length > 0" class="list-album-names">
+                <span v-for="albumName in item.albumNames.slice(0, 3)" :key="albumName">{{ albumName }}</span>
               </div>
             </div>
 
@@ -255,7 +255,7 @@ const { t } = useI18n()
   font-size: 0.92rem;
 }
 
-.list-aliases {
+.list-album-names {
   display: flex;
   flex-wrap: wrap;
   gap: 8px 10px;

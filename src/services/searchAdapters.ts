@@ -118,7 +118,7 @@ function buildLinks(item: RawItem): SearchResultLink[] {
 export function adaptSearchResult(item: RawItem): SearchResultItem {
   const title = item.name?.[0] ?? (item.self.displaytitle || item.self.fulltext)
   const subtitle = getValues(item, 'circle').join(' / ') || translate('searchResult.subtitleFallback')
-  const aliases = getValues(item, 'alname').filter((value) => value !== title)
+  const albumNames = getValues(item, 'alname').filter((value) => value !== title)
   const durationText = item.time?.[0] ? formatValue('_dur', item.time[0]) : null
   const coverUrl = item.cover?.[0]?.fullurl ?? null
   const meta = [
@@ -131,7 +131,7 @@ export function adaptSearchResult(item: RawItem): SearchResultItem {
     id: item.id,
     title,
     subtitle,
-    aliases,
+    albumNames,
     wikiUrl: item.self.fullurl,
     coverUrl,
     durationText,
