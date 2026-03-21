@@ -141,11 +141,13 @@ watch(
 
         <div class="page-layout">
           <aside class="sidebar desktop-only">
-            <SearchFiltersPanel
-              :draft-criteria="store.draftCriteria"
-              @update-range="handleRangeUpdate"
-              @update-list="handleListUpdate"
-            />
+            <div class="sidebar-scroll">
+              <SearchFiltersPanel
+                :draft-criteria="store.draftCriteria"
+                @update-range="handleRangeUpdate"
+                @update-list="handleListUpdate"
+              />
+            </div>
           </aside>
 
           <section class="content-column">
@@ -213,10 +215,16 @@ watch(
 .sidebar {
   position: sticky;
   top: 24px;
+  align-self: start;
+  min-height: 0;
+}
+
+.sidebar-scroll {
   max-height: calc(100vh - 48px);
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 0 14px 18px 12px;
+  box-sizing: border-box;
+  padding: 0 18px 24px 16px;
   scrollbar-gutter: stable;
 }
 
@@ -224,21 +232,21 @@ watch(
   min-width: 0;
 }
 
-.sidebar::-webkit-scrollbar {
+.sidebar-scroll::-webkit-scrollbar {
   width: 10px;
 }
 
-.sidebar::-webkit-scrollbar-track {
+.sidebar-scroll::-webkit-scrollbar-track {
   background: rgba(var(--v-theme-primary), 0.08);
   border-radius: 999px;
 }
 
-.sidebar::-webkit-scrollbar-thumb {
+.sidebar-scroll::-webkit-scrollbar-thumb {
   background: rgba(var(--v-theme-primary), 0.28);
   border-radius: 999px;
 }
 
-.sidebar::-webkit-scrollbar-thumb:hover {
+.sidebar-scroll::-webkit-scrollbar-thumb:hover {
   background: rgba(var(--v-theme-primary), 0.4);
 }
 
@@ -288,6 +296,10 @@ watch(
   }
 
   .sidebar {
+    min-height: auto;
+  }
+
+  .sidebar-scroll {
     max-height: none;
     overflow: visible;
     padding: 0;

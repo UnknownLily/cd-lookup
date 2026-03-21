@@ -117,8 +117,24 @@ const emit = defineEmits<{
   position: relative;
   background: linear-gradient(180deg, var(--surface-panel-strong), var(--surface-panel-soft));
   border: 1px solid var(--theme-border-soft);
-  box-shadow: var(--shadow-elevated);
+  box-shadow: var(--shadow-card-depth);
   isolation: isolate;
+  transition:
+    transform 240ms ease,
+    box-shadow 240ms ease,
+    border-color 240ms ease;
+}
+
+.result-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.54),
+    inset 0 -1px 0 rgba(var(--v-theme-primary), 0.06);
+  z-index: 6;
 }
 
 .result-action-btn,
@@ -284,6 +300,13 @@ const emit = defineEmits<{
 .result-card:hover .card-hover,
 .result-card:focus-within .card-hover {
   transform: translateY(0);
+}
+
+.result-card:hover,
+.result-card:focus-within {
+  transform: translateY(-4px);
+  border-color: rgba(var(--v-theme-primary), 0.24);
+  box-shadow: var(--shadow-card-depth-hover);
 }
 
 .result-card:hover .card-image-blur,

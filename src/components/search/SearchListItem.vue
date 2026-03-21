@@ -112,6 +112,33 @@ const emit = defineEmits<{
   overflow: hidden;
   border: 1px solid var(--theme-border-soft);
   background: var(--surface-panel-strong);
+  box-shadow: var(--shadow-soft);
+  transition:
+    transform 220ms ease,
+    box-shadow 220ms ease,
+    border-color 220ms ease;
+  position: relative;
+}
+
+.list-item::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.48),
+    inset 0 -1px 0 rgba(var(--v-theme-primary), 0.05);
+}
+
+.list-item:hover,
+.list-item:focus-within {
+  transform: translateY(-2px);
+  border-color: rgba(var(--v-theme-primary), 0.22);
+  box-shadow:
+    0 14px 28px rgba(56, 44, 34, 0.08),
+    0 26px 44px rgba(56, 44, 34, 0.06),
+    0 2px 6px rgba(255, 255, 255, 0.42) inset;
 }
 
 .result-action-btn,

@@ -21,6 +21,14 @@
   --text-muted: rgba(31, 45, 51, 0.58);
   --shadow-elevated: 0 24px 48px rgba(56, 44, 34, 0.08);
   --shadow-soft: 0 18px 36px rgba(56, 44, 34, 0.05);
+  --shadow-card-depth:
+    0 14px 28px rgba(56, 44, 34, 0.08),
+    0 32px 56px rgba(56, 44, 34, 0.06),
+    0 2px 6px rgba(255, 255, 255, 0.42) inset;
+  --shadow-card-depth-hover:
+    0 18px 36px rgba(56, 44, 34, 0.1),
+    0 40px 72px rgba(56, 44, 34, 0.08),
+    0 2px 8px rgba(255, 255, 255, 0.52) inset;
   color: #1e2930;
   background:
     radial-gradient(circle at top left, rgba(245, 150, 170, 0.24), transparent 34%),

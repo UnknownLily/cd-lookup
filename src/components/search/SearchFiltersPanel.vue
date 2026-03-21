@@ -136,6 +136,10 @@ function draftValues(key: ListFilterKey): string[] {
   gap: 16px;
 }
 
+.filters-accordion {
+  padding-top: 12px;
+}
+
 :deep(.v-expansion-panels) {
   display: grid;
   gap: 14px;
@@ -145,7 +149,9 @@ function draftValues(key: ListFilterKey): string[] {
   overflow: hidden;
   border: 1px solid var(--theme-border-soft);
   background: var(--surface-panel-muted);
-  box-shadow: var(--shadow-soft);
+  box-shadow:
+    0 10px 20px rgba(56, 44, 34, 0.04),
+    0 18px 28px rgba(56, 44, 34, 0.03);
   border-radius: 28px !important;
 }
 
