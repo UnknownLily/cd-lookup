@@ -224,6 +224,13 @@ onBeforeUnmount(() => {
   flex-shrink: 0;
 }
 
+.view-toggle :deep(.v-btn-group) {
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: inset 0 0 0 1px rgba(var(--v-theme-primary), 0.08);
+}
+
 .view-toggle :deep(.v-btn) {
   min-width: 44px;
   color: rgba(31, 45, 51, 0.62);
@@ -237,7 +244,7 @@ onBeforeUnmount(() => {
 .view-toggle :deep(.v-btn--active) {
   color: rgb(var(--v-theme-primary));
   background: rgba(var(--v-theme-primary), 0.12);
-  box-shadow: inset 0 0 0 1px rgba(var(--v-theme-primary), 0.18), 0 8px 20px rgba(92, 52, 68, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(var(--v-theme-primary), 0.18);
 }
 
 .view-toggle :deep(.v-btn--active:hover) {
