@@ -1,5 +1,3 @@
-# Vue 3 + TypeScript + Vite
+# 同人音乐专辑查询
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
-
-Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
+从 [THBWiki的对应词条](https://thwiki.cc/%E5%90%8C%E4%BA%BA%E9%9F%B3%E4%B9%90%E4%B8%93%E8%BE%91%E6%9F%A5%E8%AF%A2) 获取并查询同人音乐专辑信息的工具。
