@@ -325,6 +325,11 @@ watch(
     padding: 18px;
   }
 
+  .drawer-inner {
+    gap: 12px;
+    padding: 12px 12px 16px;
+  }
+
   .page-layout {
     grid-template-columns: 1fr;
   }

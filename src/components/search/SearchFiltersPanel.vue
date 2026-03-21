@@ -134,10 +134,13 @@ function draftValues(key: ListFilterKey): string[] {
 .filters-panel {
   display: grid;
   gap: 16px;
+  align-content: start;
+  grid-auto-rows: max-content;
 }
 
 .filters-accordion {
   padding-top: 12px;
+  align-self: start;
 }
 
 :deep(.v-expansion-panels) {
@@ -257,5 +260,41 @@ function draftValues(key: ListFilterKey): string[] {
   flex: 0 0 auto;
   white-space: nowrap;
   max-width: 100%;
+}
+
+@media (max-width: 960px) {
+  .filters-panel {
+    gap: 10px;
+  }
+
+  .filters-accordion {
+    padding-top: 0;
+  }
+
+  :deep(.v-expansion-panels) {
+    gap: 12px;
+  }
+
+  :deep(.v-expansion-panel-title) {
+    padding: 14px 18px;
+    min-height: 92px;
+  }
+
+  :deep(.v-expansion-panel-text__wrapper) {
+    padding: 0 18px 18px;
+  }
+
+  .filters-head h2 {
+    font-size: 1.28rem;
+  }
+
+  .filters-head p {
+    margin-top: 4px;
+    font-size: 0.94rem;
+  }
+
+  .group-content {
+    gap: 18px;
+  }
 }
 </style>
