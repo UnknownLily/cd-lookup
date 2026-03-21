@@ -5,6 +5,10 @@ const SITE_ALT_NAME = 'THB Music Lookup'
 const DEFAULT_DESCRIPTION = '基于 THBWiki 数据的东方同人音乐专辑检索工具，支持按制作方、发售展会、发行年份、原曲、编曲、演唱等条件筛选。'
 const DEFAULT_KEYWORDS = '东方Project,THBWiki,同人音乐,专辑查询,东方同人音乐,专辑筛选'
 const SITE_URL = (import.meta.env.VITE_SITE_URL || 'https://cd.lilywhite.cc').replace(/\/+$/, '')
+const OG_IMAGE_PATH = '/og-image.svg'
+const OG_IMAGE_WIDTH = '1200'
+const OG_IMAGE_HEIGHT = '630'
+const OG_IMAGE_ALT = '同人音乐专辑查询分享图'
 
 export interface SearchPageSeoInput {
   hasActiveSearch: boolean
@@ -24,6 +28,10 @@ function toPageUrl(pathWithSearch: string): string {
 
 function getCanonicalUrl(): string {
   return toPageUrl('/')
+}
+
+function getOgImageUrl(): string {
+  return toPageUrl(OG_IMAGE_PATH)
 }
 
 function getCurrentUrl(input: SearchPageSeoInput): string {
@@ -124,6 +132,7 @@ function buildStructuredData(input: SearchPageSeoInput, title: string, descripti
 export function createSearchPageHead(input: SearchPageSeoInput) {
   const canonicalUrl = getCanonicalUrl()
   const currentUrl = getCurrentUrl(input)
+  const ogImageUrl = getOgImageUrl()
   const title = buildTitle(input)
   const description = buildDescription(input)
   const robots = input.hasActiveSearch
@@ -162,7 +171,7 @@ export function createSearchPageHead(input: SearchPageSeoInput) {
       {
         key: 'twitter:card',
         name: 'twitter:card',
-        content: 'summary',
+        content: 'summary_large_image',
       },
       {
         key: 'twitter:title',
@@ -173,6 +182,16 @@ export function createSearchPageHead(input: SearchPageSeoInput) {
         key: 'twitter:description',
         name: 'twitter:description',
         content: description,
+      },
+      {
+        key: 'twitter:image',
+        name: 'twitter:image',
+        content: ogImageUrl,
+      },
+      {
+        key: 'twitter:image:alt',
+        name: 'twitter:image:alt',
+        content: OG_IMAGE_ALT,
       },
       {
         key: 'og:locale',
@@ -203,6 +222,26 @@ export function createSearchPageHead(input: SearchPageSeoInput) {
         key: 'og:url',
         property: 'og:url',
         content: currentUrl,
+      },
+      {
+        key: 'og:image',
+        property: 'og:image',
+        content: ogImageUrl,
+      },
+      {
+        key: 'og:image:width',
+        property: 'og:image:width',
+        content: OG_IMAGE_WIDTH,
+      },
+      {
+        key: 'og:image:height',
+        property: 'og:image:height',
+        content: OG_IMAGE_HEIGHT,
+      },
+      {
+        key: 'og:image:alt',
+        property: 'og:image:alt',
+        content: OG_IMAGE_ALT,
       },
     ],
     script: [
