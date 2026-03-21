@@ -133,9 +133,9 @@ onBeforeUnmount(() => {
     :label="label"
     :hint="statusMessage"
     persistent-hint
+    :menu-props="{ contentClass: 'tag-input-menu' }"
     :items="items"
     :model-value="modelValue"
-    :loading="loading"
     :search="search"
     multiple
     clearable
@@ -144,10 +144,22 @@ onBeforeUnmount(() => {
     hide-selected
     hide-no-data
     no-filter
-    menu-icon="$search"
     @update:search="search = String($event ?? '')"
     @update:model-value="handleModelValue"
   >
+    <template #append-inner>
+      <div class="tag-input-actions">
+        <v-progress-circular
+          v-if="loading"
+          size="18"
+          width="2"
+          indeterminate
+          color="primary"
+        />
+        <v-icon icon="$search" />
+      </div>
+    </template>
+
     <template #prepend-item>
       <div class="search-tip">
         <div class="search-tip-head">
@@ -163,6 +175,12 @@ onBeforeUnmount(() => {
 <style scoped>
 .tag-input {
   width: 100%;
+}
+
+.tag-input-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .search-tip {
@@ -238,5 +256,34 @@ onBeforeUnmount(() => {
 :deep(.v-field__clearable) {
   align-self: center;
   padding-top: 0;
+}
+
+.tag-input-actions :deep(.v-icon) {
+  color: rgba(31, 45, 51, 0.58);
+}
+</style>
+
+<style>
+.tag-input-menu {
+  border-radius: 24px;
+}
+
+.tag-input-menu .v-overlay__content,
+.tag-input-menu .v-list,
+.tag-input-menu .v-sheet {
+  background: linear-gradient(180deg, rgb(255, 250, 252) 0%, rgb(252, 244, 248) 100%) !important;
+  color: rgba(31, 45, 51, 0.9) !important;
+}
+
+.tag-input-menu .v-list-item {
+  border-radius: 14px;
+}
+
+.tag-input-menu .v-list-item:hover {
+  background: rgba(227, 143, 167, 0.08) !important;
+}
+
+.tag-input-menu .v-list-item--active {
+  background: rgba(227, 143, 167, 0.12) !important;
 }
 </style>
