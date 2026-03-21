@@ -15,6 +15,19 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 
+function splitMetaLine(line: string): { label: string; value: string } {
+  const firstSpaceIndex = line.indexOf(' ')
+
+  if (firstSpaceIndex === -1) {
+    return { label: line, value: '' }
+  }
+
+  return {
+    label: line.slice(0, firstSpaceIndex),
+    value: line.slice(firstSpaceIndex + 1),
+  }
+}
+
 const isDarkCover = ref(false)
 let toneAnalysisToken = 0
 
@@ -137,10 +150,14 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
           <h3>{{ item.title }}</h3>
           <p>{{ item.subtitle }}</p>
           <div v-if="item.albumNames.length > 0" class="album-name-row">
-            <span v-for="albumName in item.albumNames.slice(0, 2)" :key="albumName">{{ t('app.albumNamePrefix') }}{{ albumName }}</span>
+            <span v-for="albumName in item.albumNames.slice(0, 2)" :key="albumName"><strong>{{ t('app.albumNamePrefix') }}</strong>{{ albumName }}</span>
           </div>
           <div v-if="item.meta.length > 0" class="card-meta">
-            <span v-for="line in item.meta" :key="line">{{ line }}</span>
+            <span v-for="line in item.meta" :key="line">
+              <template v-for="part in [splitMetaLine(line)]" :key="part.label + part.value">
+                <strong>{{ part.label }}</strong><span v-if="part.value"> {{ part.value }}</span>
+              </template>
+            </span>
           </div>
         </div>
 
@@ -199,6 +216,19 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
   --card-muted-color: var(--text-muted);
   --card-link-color: rgba(31, 45, 51, 0.82);
   --card-link-opacity: 0.78;
+  --card-surface-bg: linear-gradient(180deg, rgba(255, 251, 252, 0.98), rgba(248, 240, 244, 0.94));
+  --card-image-wash-bg:
+    radial-gradient(circle at 86% 18%, rgba(255, 255, 255, 0.16), transparent 24%),
+    radial-gradient(circle at 76% 64%, rgba(255, 252, 253, 0.12), transparent 30%),
+    radial-gradient(circle at 62% 50%, rgba(255, 255, 255, 0.14), transparent 34%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 252, 253, 0.06) 18%, rgba(255, 249, 251, 0.18) 38%, rgba(255, 247, 249, 0.38) 62%, rgba(255, 245, 248, 0.7) 100%);
+  --card-hover-bg:
+    linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 252, 253, 0) 56%, rgba(255, 250, 251, 0.012) 68%, rgba(255, 248, 250, 0.04) 80%, rgba(255, 247, 249, 0.14) 90%, rgba(255, 245, 248, 0.36) 100%),
+    radial-gradient(circle at 84% 10%, rgba(255, 255, 255, 0.12), transparent 26%);
+  --card-hover-before-bg:
+    linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 252, 253, 0.012) 14%, rgba(255, 250, 251, 0.04) 30%, rgba(255, 248, 250, 0.1) 46%, rgba(255, 246, 248, 0.2) 64%, rgba(255, 244, 247, 0.3) 100%),
+    radial-gradient(circle at 24% 18%, rgba(255, 255, 255, 0.22), transparent 24%),
+    radial-gradient(circle at 80% 8%, rgba(255, 255, 255, 0.16), transparent 28%);
   --card-action-fg: rgb(var(--v-theme-primary));
   --card-action-bg: rgb(255, 233, 240);
   --card-action-border: rgba(var(--v-theme-primary), 0.18);
@@ -208,7 +238,7 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
   --card-summary-text-shadow: none;
   overflow: hidden;
   position: relative;
-  background: linear-gradient(180deg, var(--surface-panel-strong), var(--surface-panel-soft));
+  background: var(--card-surface-bg);
   border: 1px solid var(--theme-border-soft);
   box-shadow: var(--shadow-card-depth);
   isolation: isolate;
@@ -216,6 +246,21 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
     transform 240ms ease,
     box-shadow 240ms ease,
     border-color 240ms ease;
+}
+
+.result-card.tone-dark {
+  --card-image-wash-bg:
+    radial-gradient(circle at 86% 18%, rgba(255, 255, 255, 0.2), transparent 24%),
+    radial-gradient(circle at 76% 64%, rgba(255, 250, 252, 0.14), transparent 30%),
+    radial-gradient(circle at 62% 50%, rgba(255, 255, 255, 0.16), transparent 34%),
+    linear-gradient(180deg, rgba(255, 250, 252, 0) 0%, rgba(255, 249, 251, 0.08) 18%, rgba(255, 246, 249, 0.24) 38%, rgba(255, 243, 247, 0.44) 62%, rgba(255, 240, 245, 0.74) 100%);
+  --card-hover-bg:
+    linear-gradient(180deg, rgba(255, 250, 252, 0) 0%, rgba(255, 249, 251, 0) 56%, rgba(255, 247, 250, 0.01) 68%, rgba(255, 245, 248, 0.036) 80%, rgba(255, 242, 246, 0.12) 90%, rgba(255, 239, 244, 0.32) 100%),
+    radial-gradient(circle at 84% 10%, rgba(255, 255, 255, 0.12), transparent 26%);
+  --card-hover-before-bg:
+    linear-gradient(180deg, rgba(255, 250, 252, 0) 0%, rgba(255, 249, 251, 0.01) 14%, rgba(255, 247, 250, 0.034) 30%, rgba(255, 245, 248, 0.09) 46%, rgba(255, 241, 246, 0.18) 64%, rgba(255, 238, 243, 0.28) 100%),
+    radial-gradient(circle at 24% 18%, rgba(255, 255, 255, 0.22), transparent 24%),
+    radial-gradient(circle at 80% 8%, rgba(255, 255, 255, 0.16), transparent 28%);
 }
 
 .result-card.tone-dark:hover,
@@ -346,12 +391,22 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  opacity: 0;
   transition: opacity 240ms ease;
 }
 
+.card-image-blur {
+  opacity: 0.34;
+}
+
+.card-image-wash {
+  opacity: 0.4;
+}
+
 .result-card:hover .card-image-blur,
-.result-card:focus-within .card-image-blur,
+.result-card:focus-within .card-image-blur {
+  opacity: 0.74;
+}
+
 .result-card:hover .card-image-wash,
 .result-card:focus-within .card-image-wash,
 .result-card:hover .card-cover::after,
@@ -371,18 +426,15 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
   z-index: 2;
   background-position: center;
   background-size: cover;
-  filter: blur(26px) saturate(1.14);
-  transform: scale(1.12);
+  filter: blur(30px) saturate(0.7) brightness(1.12);
+  transform: scale(1.16);
   -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.03) 0%, rgba(0, 0, 0, 0.09) 10%, rgba(0, 0, 0, 0.24) 24%, rgba(0, 0, 0, 0.5) 44%, rgba(0, 0, 0, 0.82) 68%, rgba(0, 0, 0, 1) 100%);
   mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.03) 0%, rgba(0, 0, 0, 0.09) 10%, rgba(0, 0, 0, 0.24) 24%, rgba(0, 0, 0, 0.5) 44%, rgba(0, 0, 0, 0.82) 68%, rgba(0, 0, 0, 1) 100%);
 }
 
 .card-image-wash {
   z-index: 3;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(251, 242, 246, 0.03) 8%, rgba(249, 236, 241, 0.11) 18%, rgba(248, 232, 238, 0.28) 32%, rgba(247, 231, 237, 0.54) 52%, rgba(246, 229, 235, 0.8) 74%, rgba(245, 227, 234, 0.95) 100%),
-    radial-gradient(circle at 18% 22%, rgba(255, 250, 252, 0.14), transparent 22%),
-    radial-gradient(circle at 84% 14%, rgba(var(--v-theme-accent), 0.12), transparent 24%);
+  background: var(--card-image-wash-bg);
   -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.04) 8%, rgba(0, 0, 0, 0.15) 20%, rgba(0, 0, 0, 0.36) 36%, rgba(0, 0, 0, 0.68) 58%, rgba(0, 0, 0, 0.92) 80%, rgba(0, 0, 0, 1) 100%);
   mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.04) 8%, rgba(0, 0, 0, 0.15) 20%, rgba(0, 0, 0, 0.36) 36%, rgba(0, 0, 0, 0.68) 58%, rgba(0, 0, 0, 0.92) 80%, rgba(0, 0, 0, 1) 100%);
 }
@@ -415,9 +467,7 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
   gap: 12px;
   transform: translateY(calc(100% - 252px));
   transition: transform 240ms ease;
-  background:
-    linear-gradient(180deg, rgba(255, 247, 250, 0) 0%, rgba(255, 245, 249, 0.006) 24%, rgba(252, 239, 244, 0.04) 38%, rgba(249, 234, 240, 0.14) 54%, rgba(247, 231, 237, 0.4) 74%, rgba(245, 228, 234, 0.82) 100%),
-    radial-gradient(circle at 84% 10%, rgba(var(--v-theme-accent), 0.14), transparent 26%);
+  background: transparent;
 }
 
 .card-hover::before {
@@ -425,19 +475,30 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
   position: absolute;
   left: 0;
   right: 0;
-  top: -344px;
+  top: -432px;
   bottom: 0;
   pointer-events: none;
-  opacity: 0;
-  background:
-    linear-gradient(180deg, rgba(255, 247, 250, 0) 0%, rgba(255, 245, 249, 0.012) 16%, rgba(252, 239, 244, 0.055) 30%, rgba(249, 234, 240, 0.16) 46%, rgba(247, 231, 237, 0.34) 66%, rgba(245, 228, 234, 0.58) 100%),
-    radial-gradient(circle at 24% 18%, rgba(255, 250, 252, 0.16), transparent 24%),
-    radial-gradient(circle at 80% 8%, rgba(var(--v-theme-accent), 0.14), transparent 28%);
-  backdrop-filter: blur(14px) saturate(1.08);
-  -webkit-backdrop-filter: blur(14px) saturate(1.08);
+  opacity: 0.42;
+  background: var(--card-hover-before-bg);
+  backdrop-filter: blur(15px) saturate(0.82) brightness(1.06);
+  -webkit-backdrop-filter: blur(15px) saturate(0.82) brightness(1.06);
   -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.025) 10%, rgba(0, 0, 0, 0.1) 22%, rgba(0, 0, 0, 0.26) 38%, rgba(0, 0, 0, 0.56) 60%, rgba(0, 0, 0, 0.88) 82%, rgba(0, 0, 0, 1) 100%);
   mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.025) 10%, rgba(0, 0, 0, 0.1) 22%, rgba(0, 0, 0, 0.26) 38%, rgba(0, 0, 0, 0.56) 60%, rgba(0, 0, 0, 0.88) 82%, rgba(0, 0, 0, 1) 100%);
   transition: opacity 220ms ease;
+}
+
+.card-hover::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 88px;
+  pointer-events: none;
+  background: var(--card-hover-bg);
+  opacity: 0.92;
+  -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.14) 20%, rgba(0, 0, 0, 0.42) 40%, rgba(0, 0, 0, 0.74) 64%, rgba(0, 0, 0, 1) 100%);
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.14) 20%, rgba(0, 0, 0, 0.42) 40%, rgba(0, 0, 0, 0.74) 64%, rgba(0, 0, 0, 1) 100%);
 }
 
 .card-heading h3 {
@@ -467,6 +528,14 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
   color: var(--card-muted-color);
   font-size: 0.92rem;
   text-shadow: var(--card-summary-text-shadow);
+}
+
+.card-meta strong,
+.album-name-row strong {
+  display: inline-block;
+  margin-inline-end: 0.35em;
+  color: var(--card-title-color);
+  font-weight: 700;
 }
 
 .album-name-row {
@@ -531,6 +600,11 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
 
 .result-card:hover .card-hover::before,
 .result-card:focus-within .card-hover::before {
+  opacity: 1;
+}
+
+.result-card:hover .card-hover::after,
+.result-card:focus-within .card-hover::after {
   opacity: 1;
 }
 

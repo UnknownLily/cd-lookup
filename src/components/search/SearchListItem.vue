@@ -1,9 +1,10 @@
 <script setup lang="ts">
+import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import TagActionMenu from './TagActionMenu.vue'
 import { getFieldLabel, type SearchResultItem, type SearchTag } from '../../types/search'
 
-defineProps<{
+const props = defineProps<{
   item: SearchResultItem
 }>()
 
@@ -13,11 +14,128 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+
+const isDarkCover = ref(false)
+let toneAnalysisToken = 0
+
+function splitMetaLine(line: string): { label: string; value: string } {
+  const firstSpaceIndex = line.indexOf(' ')
+
+  if (firstSpaceIndex === -1) {
+    return { label: line, value: '' }
+  }
+
+  return {
+    label: line.slice(0, firstSpaceIndex),
+    value: line.slice(firstSpaceIndex + 1),
+  }
+}
+
+watch(
+  () => props.item.coverUrl,
+  (coverUrl) => {
+    toneAnalysisToken += 1
+    const currentToken = toneAnalysisToken
+    isDarkCover.value = false
+
+    if (!coverUrl) {
+      return
+    }
+
+    void detectCoverTone(coverUrl, currentToken)
+  },
+  { immediate: true },
+)
+
+async function detectCoverTone(coverUrl: string, currentToken: number): Promise<void> {
+  try {
+    const image = await loadImageElement(coverUrl)
+    const luminance = sampleTopAreaLuminance(image)
+
+    if (currentToken !== toneAnalysisToken) {
+      return
+    }
+
+    isDarkCover.value = luminance < 118
+  } catch {
+    if (currentToken !== toneAnalysisToken) {
+      return
+    }
+
+    isDarkCover.value = false
+  }
+}
+
+function loadImageElement(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const image = new Image()
+    image.crossOrigin = 'anonymous'
+    image.decoding = 'async'
+    image.onload = () => resolve(image)
+    image.onerror = () => reject(new Error('image-load-failed'))
+    image.src = src
+  })
+}
+
+function sampleTopAreaLuminance(image: HTMLImageElement): number {
+  const canvas = document.createElement('canvas')
+  const width = 32
+  const height = 32
+  const sampleHeight = 18
+
+  canvas.width = width
+  canvas.height = height
+
+  const context = canvas.getContext('2d', { willReadFrequently: true })
+  if (!context) {
+    return 255
+  }
+
+  context.drawImage(image, 0, 0, width, height)
+  const { data } = context.getImageData(0, 0, width, sampleHeight)
+
+  let weightedLuminance = 0
+  let totalWeight = 0
+
+  for (let y = 0; y < sampleHeight; y += 1) {
+    const verticalWeight = 1.2 - y / sampleHeight / 2
+
+    for (let x = 0; x < width; x += 1) {
+      const index = (y * width + x) * 4
+      const alpha = data[index + 3] / 255
+
+      if (alpha <= 0) {
+        continue
+      }
+
+      const red = data[index]
+      const green = data[index + 1]
+      const blue = data[index + 2]
+      const luminance = 0.2126 * red + 0.7152 * green + 0.0722 * blue
+      const weight = verticalWeight * alpha
+
+      weightedLuminance += luminance * weight
+      totalWeight += weight
+    }
+  }
+
+  return totalWeight > 0 ? weightedLuminance / totalWeight : 255
+}
 </script>
 
 <template>
-  <v-card class="list-item" variant="flat">
+  <v-card class="list-item" :class="{ 'tone-dark': isDarkCover }" variant="flat">
     <div class="list-cover">
+      <div
+        v-if="item.coverUrl"
+        class="list-cover-art"
+        :style="{
+          backgroundImage: `url(${item.coverUrl})`,
+        }"
+        aria-hidden="true"
+      />
+      <div class="list-cover-wash" aria-hidden="true" />
+
       <div v-if="item.coverUrl" class="list-cover-frame">
         <v-img :src="item.coverUrl" :alt="item.title" class="list-cover-image" contain height="156" />
       </div>
@@ -42,7 +160,9 @@ const { t } = useI18n()
               <h3>{{ item.title }}</h3>
               <p>{{ item.subtitle }}</p>
               <div v-if="item.albumNames.length > 0" class="list-album-names">
-                <span v-for="albumName in item.albumNames.slice(0, 3)" :key="albumName">{{ albumName }}</span>
+                <span v-for="albumName in item.albumNames.slice(0, 3)" :key="albumName">
+                  <strong>{{ t('app.albumNamePrefix') }}</strong>{{ albumName }}
+                </span>
               </div>
             </div>
 
@@ -60,7 +180,11 @@ const { t } = useI18n()
           </div>
 
           <div v-if="item.meta.length > 0" class="list-meta">
-            <span v-for="line in item.meta" :key="line">{{ line }}</span>
+            <span v-for="line in item.meta" :key="line">
+              <template v-for="part in [splitMetaLine(line)]" :key="part.label + part.value">
+                <strong>{{ part.label }}</strong><span v-if="part.value"> {{ part.value }}</span>
+              </template>
+            </span>
           </div>
 
           <div v-if="item.links.length > 0" class="list-links">
@@ -69,7 +193,7 @@ const { t } = useI18n()
               v-for="link in item.links.slice(0, 2)"
               :key="link.key"
               size="small"
-              variant="text"
+              variant="tonal"
               color="secondary"
               :href="link.url"
               target="_blank"
@@ -102,18 +226,37 @@ const { t } = useI18n()
 
 <style scoped>
 .list-item {
+  --list-cover-wash:
+    radial-gradient(circle at 50% 16%, rgba(255, 255, 255, 0.34), transparent 40%),
+    radial-gradient(circle at 20% 74%, rgba(255, 250, 252, 0.08), transparent 46%),
+    linear-gradient(180deg, rgba(255, 250, 252, 0.24) 0%, rgba(255, 247, 250, 0.08) 46%, rgba(255, 243, 247, 0.2) 100%);
+  --list-body-wash:
+    radial-gradient(circle at 84% 18%, rgba(255, 255, 255, 0.16), transparent 24%),
+    radial-gradient(circle at 72% 62%, rgba(255, 255, 255, 0.12), transparent 32%),
+    linear-gradient(90deg, rgba(255, 252, 253, 0.9) 0%, rgba(255, 250, 251, 0.82) 30%, rgba(255, 247, 249, 0.56) 62%, rgba(255, 244, 247, 0.3) 100%);
   display: grid;
   grid-template-columns: 188px minmax(0, 1fr);
   gap: 0;
   overflow: hidden;
   border: 1px solid var(--theme-border-soft);
-  background: var(--surface-panel-strong);
+  background: linear-gradient(135deg, rgba(255, 251, 252, 0.98) 0%, rgba(251, 244, 247, 0.95) 48%, rgba(247, 239, 243, 0.92) 100%);
   box-shadow: var(--shadow-soft);
   transition:
     transform 220ms ease,
     box-shadow 220ms ease,
     border-color 220ms ease;
   position: relative;
+}
+
+.list-item.tone-dark {
+  --list-cover-wash:
+    radial-gradient(circle at 50% 16%, rgba(255, 255, 255, 0.42), transparent 38%),
+    radial-gradient(circle at 26% 74%, rgba(255, 248, 250, 0.12), transparent 44%),
+    linear-gradient(180deg, rgba(255, 250, 252, 0.36) 0%, rgba(255, 246, 249, 0.14) 48%, rgba(255, 241, 246, 0.3) 100%);
+  --list-body-wash:
+    radial-gradient(circle at 84% 18%, rgba(255, 255, 255, 0.2), transparent 24%),
+    radial-gradient(circle at 72% 62%, rgba(255, 252, 253, 0.14), transparent 32%),
+    linear-gradient(90deg, rgba(255, 252, 253, 0.92) 0%, rgba(255, 249, 251, 0.84) 30%, rgba(255, 245, 248, 0.6) 62%, rgba(255, 242, 246, 0.34) 100%);
 }
 
 .list-item::after {
@@ -132,9 +275,50 @@ const { t } = useI18n()
   transform: translateY(-2px);
   border-color: rgba(var(--v-theme-primary), 0.22);
   box-shadow:
-    0 14px 28px rgba(56, 44, 34, 0.08),
-    0 26px 44px rgba(56, 44, 34, 0.06),
+    0 16px 30px rgba(56, 44, 34, 0.09),
+    0 28px 48px rgba(56, 44, 34, 0.07),
     0 2px 6px rgba(255, 255, 255, 0.42) inset;
+}
+
+.list-item:hover .list-cover-art,
+.list-item:focus-within .list-cover-art {
+  opacity: 0.88;
+  filter: blur(34px) saturate(1.34);
+  transform: scale(1.22);
+}
+
+.list-item.tone-dark .list-cover-art {
+  opacity: 0.8;
+  filter: blur(32px) saturate(1.34);
+}
+
+.list-item.tone-dark:hover .list-cover-art,
+.list-item.tone-dark:focus-within .list-cover-art {
+  opacity: 0.94;
+  filter: blur(36px) saturate(1.42);
+}
+
+.list-item:hover .list-body-art,
+.list-item:focus-within .list-body-art {
+  inset: -22% -8% -22% 36%;
+  background-position: 44% center;
+  opacity: 0.6;
+  filter: blur(38px) saturate(0.72) brightness(1.14);
+  transform: translateX(-12px) scale(1.26);
+}
+
+.list-item:hover .list-body-wash,
+.list-item:focus-within .list-body-wash {
+  opacity: 1;
+}
+
+.list-item.tone-dark:hover .list-body-art,
+.list-item.tone-dark:focus-within .list-body-art {
+  inset: -22% -8% -22% 34%;
+  background-position: 42% center;
+  opacity: 0.64;
+  filter: blur(40px) saturate(0.78) brightness(1.12);
+  transform: translateX(-16px) scale(1.28);
 }
 
 .result-action-btn,
@@ -144,8 +328,22 @@ const { t } = useI18n()
 
 .result-action-btn {
   color: rgb(var(--v-theme-primary)) !important;
-  background: rgba(var(--v-theme-primary), 0.12) !important;
-  border: 1px solid rgba(var(--v-theme-primary), 0.1);
+  background: rgb(255, 233, 240) !important;
+  border: 1px solid rgba(var(--v-theme-primary), 0.18);
+  box-shadow: 0 8px 18px rgba(92, 52, 68, 0.12);
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.result-action-btn:hover,
+.result-action-btn:focus-visible {
+  background: rgb(255, 223, 233) !important;
+  border-color: rgba(var(--v-theme-primary), 0.28);
+  box-shadow: 0 12px 24px rgba(92, 52, 68, 0.18);
+  transform: translateY(-1px);
 }
 
 .result-action-btn :deep(.v-btn__content),
@@ -155,16 +353,58 @@ const { t } = useI18n()
 
 .result-link-btn {
   opacity: 0.78;
+  color: rgba(31, 45, 51, 0.82) !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  border: 1px solid rgba(var(--v-theme-secondary), 0.12);
+  box-shadow: 0 6px 14px rgba(92, 52, 68, 0.08);
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.result-link-btn:hover,
+.result-link-btn:focus-visible {
+  background: rgba(255, 255, 255, 0.98) !important;
+  border-color: rgba(var(--v-theme-secondary), 0.2);
+  box-shadow: 0 10px 20px rgba(92, 52, 68, 0.12);
+  transform: translateY(-1px);
 }
 
 .list-cover {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
   display: grid;
   place-items: center;
   padding: 16px 10px;
-  background: linear-gradient(180deg, rgba(var(--v-theme-accent), 0.1), rgba(var(--v-theme-primary), 0.08));
+  background: linear-gradient(180deg, rgba(255, 249, 251, 0.92), rgba(250, 242, 246, 0.76));
+}
+
+.list-cover-art {
+  position: absolute;
+  inset: -16% -10% -14% -10%;
+  background-position: center;
+  background-size: cover;
+  opacity: 0.82;
+  filter: blur(32px) saturate(1.22);
+  transform: scale(1.18);
+  transition:
+    opacity 220ms ease,
+    filter 240ms ease,
+    transform 240ms ease;
+}
+
+.list-cover-wash {
+  position: absolute;
+  inset: 0;
+  background: var(--list-cover-wash);
 }
 
 .list-cover-frame {
+  position: relative;
+  z-index: 1;
   width: 100%;
   height: 100%;
   min-height: 156px;
@@ -212,20 +452,25 @@ const { t } = useI18n()
 .list-body-art {
   position: absolute;
   inset: -18% -4% -18% 52%;
-  background-position: center;
+  background-position: 56% center;
   background-size: cover;
-  opacity: 0.48;
-  filter: blur(26px) saturate(1.18);
-  transform: scale(1.12);
+  opacity: 0.5;
+  filter: blur(34px) saturate(0.62) brightness(1.16);
+  transform: translateX(0) scale(1.16);
+  transition:
+    background-position 280ms ease,
+    inset 260ms ease,
+    opacity 240ms ease,
+    filter 260ms ease,
+    transform 260ms ease;
 }
 
 .list-body-wash {
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(circle at 82% 24%, rgba(var(--v-theme-accent), 0.18), transparent 22%),
-    radial-gradient(circle at 74% 68%, rgba(var(--v-theme-secondary), 0.1), transparent 28%),
-    linear-gradient(90deg, rgba(255, 248, 250, 0.95) 0%, rgba(255, 246, 249, 0.9) 34%, rgba(249, 236, 242, 0.74) 64%, rgba(246, 229, 236, 0.58) 100%);
+  opacity: 0.9;
+  background: var(--list-body-wash);
+  transition: opacity 220ms ease;
 }
 
 .list-header {
@@ -253,6 +498,14 @@ const { t } = useI18n()
   gap: 8px 14px;
   color: var(--text-muted);
   font-size: 0.92rem;
+}
+
+.list-meta strong,
+.list-album-names strong {
+  display: inline-block;
+  margin-inline-end: 0.35em;
+  color: var(--text-strong);
+  font-weight: 700;
 }
 
 .list-album-names {
@@ -331,7 +584,7 @@ const { t } = useI18n()
   }
   .list-body-art {
     inset: 44% -8% -10% -8%;
-    opacity: 0.32;
+    opacity: 0.18;
   }
 
   .dense-section {

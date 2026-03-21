@@ -75,9 +75,23 @@ function setAsFilter(): void {
 <style scoped>
 .tag-chip {
   cursor: pointer;
-  color: rgb(var(--v-theme-secondary));
-  background: rgba(var(--v-theme-secondary), 0.1);
-  border: 1px solid rgba(var(--v-theme-secondary), 0.08);
+  color: rgb(var(--v-theme-primary));
+  background: rgb(255, 233, 240);
+  border: 1px solid rgba(var(--v-theme-primary), 0.18);
+  box-shadow: 0 6px 14px rgba(92, 52, 68, 0.08);
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.tag-chip:hover,
+.tag-chip:focus-visible {
+  background: rgb(255, 223, 233);
+  border-color: rgba(var(--v-theme-primary), 0.28);
+  box-shadow: 0 10px 20px rgba(92, 52, 68, 0.12);
+  transform: translateY(-1px);
 }
 
 .tag-menu-list {
