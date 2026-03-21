@@ -16,21 +16,24 @@ const mobileFiltersOpen = ref(false)
 const statusBanner = computed(() => {
   if (store.isRefreshing) {
     return {
-      type: 'info' as const,
+      tone: 'primary' as const,
+      icon: '$searchScan',
       text: '正在按新条件查询，当前仍显示上一批成功结果。后端响应较慢，请稍候。',
     }
   }
 
   if (store.errorMessage) {
     return {
-      type: 'warning' as const,
+      tone: 'error' as const,
+      icon: '$alertCircleOutline',
       text: store.errorMessage,
     }
   }
 
   if (store.noticeMessage) {
     return {
-      type: 'info' as const,
+      tone: 'secondary' as const,
+      icon: '$applyFilter',
       text: store.noticeMessage,
     }
   }
@@ -128,11 +131,10 @@ watch(
 
         <v-alert
           v-if="statusBanner"
-          :type="statusBanner.type"
-          variant="tonal"
+          :icon="statusBanner.icon"
+          variant="flat"
           rounded="xl"
-          border="start"
-          class="status-banner"
+          :class="['status-banner', `status-banner--${statusBanner.tone}`]"
         >
           {{ statusBanner.text }}
         </v-alert>
@@ -200,7 +202,44 @@ watch(
 }
 
 .status-banner {
+  --status-banner-rgb: var(--v-theme-primary);
+  position: relative;
+  overflow: hidden;
   backdrop-filter: blur(8px);
+  border: 1px solid rgba(var(--status-banner-rgb), 0.16);
+  border-inline-start-width: 5px;
+  border-inline-start-color: rgba(var(--status-banner-rgb), 0.38);
+  background: rgba(var(--status-banner-rgb), 0.1) !important;
+  color: rgb(var(--status-banner-rgb)) !important;
+  box-shadow: 0 10px 24px rgba(var(--status-banner-rgb), 0.04);
+}
+
+.status-banner--primary {
+  --status-banner-rgb: var(--v-theme-primary);
+}
+
+.status-banner--secondary {
+  --status-banner-rgb: var(--v-theme-secondary);
+}
+
+.status-banner--error {
+  --status-banner-rgb: var(--v-theme-primary);
+}
+
+.status-banner :deep(.v-alert__prepend .v-icon) {
+  color: rgb(var(--status-banner-rgb));
+}
+
+.status-banner :deep(.v-alert__prepend) {
+  margin-inline-end: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-banner :deep(.v-alert__content) {
+  color: rgb(var(--status-banner-rgb));
+  font-weight: 600;
 }
 
 .page-layout {
