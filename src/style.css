@@ -5,11 +5,27 @@
   --search-input-radius: 24px;
   --search-control-radius: 18px;
   --search-menu-radius: 20px;
+  --theme-border-soft: rgba(var(--v-theme-primary), 0.16);
+  --theme-border-strong: rgba(var(--v-theme-primary), 0.26);
+  --theme-fill-soft: rgba(var(--v-theme-primary), 0.14);
+  --theme-fill-subtle: rgba(var(--v-theme-primary), 0.08);
+  --theme-fill-secondary: rgba(var(--v-theme-secondary), 0.14);
+  --surface-page-top: #fdf6f8;
+  --surface-page-mid: #faeff3;
+  --surface-page-bottom: #f6e9ee;
+  --surface-panel-strong: rgba(255, 249, 251, 0.98);
+  --surface-panel-soft: rgba(249, 238, 242, 0.94);
+  --surface-panel-muted: rgba(255, 247, 250, 0.92);
+  --text-strong: #1f2d33;
+  --text-soft: rgba(31, 45, 51, 0.72);
+  --text-muted: rgba(31, 45, 51, 0.58);
+  --shadow-elevated: 0 24px 48px rgba(56, 44, 34, 0.08);
+  --shadow-soft: 0 18px 36px rgba(56, 44, 34, 0.05);
   color: #1e2930;
   background:
-    radial-gradient(circle at top left, rgba(212, 169, 117, 0.18), transparent 34%),
-    radial-gradient(circle at top right, rgba(82, 125, 155, 0.14), transparent 28%),
-    linear-gradient(180deg, #f7f0e7 0%, #f4ede4 45%, #efe7dd 100%);
+    radial-gradient(circle at top left, rgba(245, 150, 170, 0.24), transparent 34%),
+    radial-gradient(circle at top right, rgba(243, 126, 153, 0.18), transparent 28%),
+    linear-gradient(180deg, var(--surface-page-top) 0%, var(--surface-page-mid) 42%, var(--surface-page-bottom) 100%);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;

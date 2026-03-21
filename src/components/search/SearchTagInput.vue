@@ -167,7 +167,7 @@ onBeforeUnmount(() => {
 
 .search-tip {
   padding: 12px 16px 10px;
-  border-bottom: 1px solid rgba(130, 104, 76, 0.12);
+  border-bottom: 1px solid rgba(var(--v-theme-primary), 0.16);
 }
 
 .search-tip-head {
@@ -189,8 +189,8 @@ onBeforeUnmount(() => {
   justify-content: center;
   padding: 4px 10px;
   border-radius: 999px;
-  background: rgba(70, 106, 116, 0.12);
-  color: #466a74;
+  background: rgba(var(--v-theme-secondary), 0.14);
+  color: rgb(var(--v-theme-secondary));
   font-size: 0.76rem;
   white-space: nowrap;
 }

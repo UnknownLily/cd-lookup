@@ -192,11 +192,11 @@ onBeforeUnmount(() => {
   place-items: center;
   gap: 12px;
   text-align: center;
-  border: 1px dashed rgba(130, 104, 76, 0.26);
-  background: rgba(255, 250, 244, 0.65);
+  border: 1px dashed var(--theme-border-strong);
+  background: rgba(255, 246, 249, 0.72);
   border-radius: 28px;
   padding: 32px;
-  color: rgba(31, 45, 51, 0.72);
+  color: var(--text-soft);
 }
 
 .results-empty h3 {
@@ -213,9 +213,9 @@ onBeforeUnmount(() => {
 .list-skeleton {
   border-radius: 28px;
   overflow: hidden;
-  border: 1px solid rgba(130, 104, 76, 0.1);
-  background: rgba(255, 250, 244, 0.92);
-  box-shadow: 0 18px 36px rgba(56, 44, 34, 0.05);
+  border: 1px solid var(--theme-border-soft);
+  background: var(--surface-panel-muted);
+  box-shadow: var(--shadow-soft);
 }
 
 .card-skeleton {

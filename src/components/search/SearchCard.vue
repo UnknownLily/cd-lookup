@@ -14,6 +14,16 @@ const emit = defineEmits<{
 
 <template>
   <v-card class="result-card" variant="flat">
+    <div
+      v-if="item.coverUrl"
+      class="card-image-blur"
+      :style="{
+        backgroundImage: `url(${item.coverUrl})`,
+      }"
+      aria-hidden="true"
+    />
+    <div v-if="item.coverUrl" class="card-image-wash" aria-hidden="true" />
+
     <div class="card-cover">
       <v-img v-if="item.coverUrl" :src="item.coverUrl" :alt="item.title" cover height="320" />
       <div v-else class="cover-fallback">
@@ -39,6 +49,7 @@ const emit = defineEmits<{
             <v-btn
               class="result-action-btn"
               color="primary"
+              variant="tonal"
               append-icon="mdi-open-in-new"
               :href="item.wikiUrl"
               target="_blank"
@@ -104,9 +115,10 @@ const emit = defineEmits<{
 .result-card {
   overflow: hidden;
   position: relative;
-  background: linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(248, 242, 232, 0.96));
-  border: 1px solid rgba(130, 104, 76, 0.12);
-  box-shadow: 0 24px 48px rgba(61, 49, 39, 0.08);
+  background: linear-gradient(180deg, var(--surface-panel-strong), var(--surface-panel-soft));
+  border: 1px solid var(--theme-border-soft);
+  box-shadow: var(--shadow-elevated);
+  isolation: isolate;
 }
 
 .result-action-btn,
@@ -114,8 +126,72 @@ const emit = defineEmits<{
   border-radius: var(--search-control-radius);
 }
 
+.result-action-btn {
+  color: rgb(var(--v-theme-primary)) !important;
+  background: rgba(var(--v-theme-primary), 0.14) !important;
+  border: 1px solid rgba(var(--v-theme-primary), 0.12);
+}
+
+.result-action-btn :deep(.v-btn__content),
+.result-action-btn :deep(.v-icon) {
+  color: inherit;
+}
+
+.result-link-btn {
+  opacity: 0.78;
+}
+
 .card-cover {
-  background: linear-gradient(180deg, rgba(70, 106, 116, 0.08), rgba(142, 75, 42, 0.04));
+  position: relative;
+  z-index: 1;
+  background: linear-gradient(180deg, rgba(var(--v-theme-accent), 0.1), rgba(var(--v-theme-primary), 0.08));
+}
+
+.card-image-blur,
+.card-image-wash {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 240ms ease;
+}
+
+.card-image-blur {
+  z-index: 2;
+  background-position: center;
+  background-size: cover;
+  filter: blur(26px) saturate(1.14);
+  transform: scale(1.12);
+  mask-image: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.04) 10%,
+    rgba(0, 0, 0, 0.14) 22%,
+    rgba(0, 0, 0, 0.34) 38%,
+    rgba(0, 0, 0, 0.64) 54%,
+    rgba(0, 0, 0, 0.9) 70%,
+    rgba(0, 0, 0, 1) 82%,
+    rgba(0, 0, 0, 1) 100%
+  );
+}
+
+.card-image-wash {
+  z-index: 3;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(251, 242, 246, 0.04) 14%, rgba(249, 236, 241, 0.14) 28%, rgba(248, 232, 238, 0.34) 44%, rgba(247, 231, 237, 0.6) 60%, rgba(246, 229, 235, 0.8) 76%, rgba(245, 227, 234, 0.94) 100%),
+    radial-gradient(circle at 18% 22%, rgba(255, 250, 252, 0.14), transparent 22%),
+    radial-gradient(circle at 84% 14%, rgba(var(--v-theme-accent), 0.12), transparent 24%);
+  mask-image: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.03) 12%,
+    rgba(0, 0, 0, 0.12) 24%,
+    rgba(0, 0, 0, 0.3) 40%,
+    rgba(0, 0, 0, 0.58) 56%,
+    rgba(0, 0, 0, 0.86) 72%,
+    rgba(0, 0, 0, 1) 84%,
+    rgba(0, 0, 0, 1) 100%
+  );
 }
 
 .cover-fallback {
@@ -124,12 +200,13 @@ const emit = defineEmits<{
   place-items: center;
   color: rgba(31, 45, 51, 0.55);
   background:
-    radial-gradient(circle at top, rgba(191, 125, 69, 0.3), transparent 40%),
-    linear-gradient(135deg, rgba(70, 106, 116, 0.12), rgba(142, 75, 42, 0.08));
+    radial-gradient(circle at top, rgba(var(--v-theme-primary), 0.3), transparent 40%),
+    linear-gradient(135deg, rgba(var(--v-theme-accent), 0.14), rgba(var(--v-theme-primary), 0.1));
 }
 
 .card-body {
   position: relative;
+  z-index: 4;
   min-height: 224px;
 }
 
@@ -142,7 +219,7 @@ const emit = defineEmits<{
 
 .card-heading p {
   margin: 6px 0 0;
-  color: rgba(31, 45, 51, 0.72);
+  color: var(--text-soft);
 }
 
 .card-meta {
@@ -150,7 +227,7 @@ const emit = defineEmits<{
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 10px;
-  color: rgba(31, 45, 51, 0.58);
+  color: var(--text-muted);
   font-size: 0.92rem;
 }
 
@@ -159,7 +236,7 @@ const emit = defineEmits<{
   flex-wrap: wrap;
   gap: 8px 12px;
   margin-top: 8px;
-  color: rgba(31, 45, 51, 0.56);
+  color: var(--text-muted);
   font-size: 0.86rem;
 }
 
@@ -175,8 +252,7 @@ const emit = defineEmits<{
   flex-direction: column;
   gap: 12px;
   transform: translateY(calc(100% - 224px));
-  transition: transform 240ms ease, box-shadow 240ms ease;
-  box-shadow: 0 -10px 28px rgba(31, 45, 51, 0.1);
+  transition: transform 240ms ease;
 }
 
 .card-hover::before {
@@ -189,11 +265,9 @@ const emit = defineEmits<{
   pointer-events: none;
   opacity: 0;
   background:
-    linear-gradient(180deg, rgba(255, 250, 244, 0.08) 0%, rgba(255, 250, 244, 0.16) 10%, rgba(255, 249, 242, 0.5) 26%, rgba(249, 242, 234, 0.86) 52%, rgba(247, 239, 230, 0.97) 100%),
-    radial-gradient(circle at 24% 18%, rgba(255, 255, 255, 0.26), transparent 24%),
-    radial-gradient(circle at 80% 8%, rgba(207, 164, 129, 0.18), transparent 28%);
-  backdrop-filter: blur(14px) saturate(1.1);
-  border-top: 1px solid rgba(255, 255, 255, 0.18);
+    linear-gradient(180deg, rgba(255, 247, 250, 0.01) 0%, rgba(255, 245, 249, 0.05) 12%, rgba(252, 239, 244, 0.16) 28%, rgba(249, 234, 240, 0.4) 48%, rgba(247, 231, 237, 0.66) 70%, rgba(245, 228, 234, 0.82) 100%),
+    radial-gradient(circle at 24% 18%, rgba(255, 250, 252, 0.12), transparent 24%),
+    radial-gradient(circle at 80% 8%, rgba(var(--v-theme-accent), 0.1), transparent 28%);
   transition: opacity 220ms ease;
 }
 
@@ -209,8 +283,14 @@ const emit = defineEmits<{
 
 .result-card:hover .card-hover,
 .result-card:focus-within .card-hover {
-  transform: translateY(-18px);
-  box-shadow: 0 -18px 42px rgba(31, 45, 51, 0.14);
+  transform: translateY(0);
+}
+
+.result-card:hover .card-image-blur,
+.result-card:focus-within .card-image-blur,
+.result-card:hover .card-image-wash,
+.result-card:focus-within .card-image-wash {
+  opacity: 1;
 }
 
 .result-card:hover .card-hover::before,

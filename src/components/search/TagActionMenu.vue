@@ -69,6 +69,9 @@ function setAsFilter(): void {
 <style scoped>
 .tag-chip {
   cursor: pointer;
+  color: rgb(var(--v-theme-secondary));
+  background: rgba(var(--v-theme-secondary), 0.1);
+  border: 1px solid rgba(var(--v-theme-secondary), 0.08);
 }
 
 .tag-menu-list {

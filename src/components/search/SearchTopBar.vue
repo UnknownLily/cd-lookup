@@ -262,9 +262,9 @@ const emit = defineEmits<{
 
 <style scoped>
 .top-bar {
-  background: linear-gradient(180deg, rgba(255, 250, 244, 0.96), rgba(250, 244, 236, 0.92));
-  border: 1px solid rgba(130, 104, 76, 0.12);
-  box-shadow: 0 24px 48px rgba(56, 44, 34, 0.08);
+  background: linear-gradient(180deg, var(--surface-panel-strong), var(--surface-panel-soft));
+  border: 1px solid var(--theme-border-soft);
+  box-shadow: var(--shadow-elevated);
   padding: 24px;
 }
 
@@ -328,7 +328,7 @@ const emit = defineEmits<{
 
 .keyword-menu {
   width: min(720px, calc(100vw - 48px));
-  border: 1px solid rgba(130, 104, 76, 0.12);
+  border: 1px solid var(--theme-border-soft);
   box-shadow: 0 20px 40px rgba(56, 44, 34, 0.12);
   overflow: hidden;
 }
@@ -339,7 +339,7 @@ const emit = defineEmits<{
 
 .keyword-tip {
   padding: 12px 16px 10px;
-  border-bottom: 1px solid rgba(130, 104, 76, 0.12);
+  border-bottom: 1px solid var(--theme-border-soft);
 }
 
 .keyword-tip-head {
@@ -352,7 +352,7 @@ const emit = defineEmits<{
 .keyword-tip-title {
   font-size: 0.86rem;
   font-weight: 700;
-  color: rgba(31, 45, 51, 0.82);
+  color: var(--text-strong);
 }
 
 .keyword-tip-badge {
@@ -361,8 +361,8 @@ const emit = defineEmits<{
   justify-content: center;
   padding: 4px 10px;
   border-radius: 999px;
-  background: rgba(70, 106, 116, 0.12);
-  color: #466a74;
+  background: var(--theme-fill-secondary);
+  color: rgb(var(--v-theme-secondary));
   font-size: 0.76rem;
   white-space: nowrap;
 }
@@ -370,7 +370,7 @@ const emit = defineEmits<{
 .keyword-tip-text {
   margin-top: 4px;
   font-size: 0.82rem;
-  color: rgba(31, 45, 51, 0.58);
+  color: var(--text-muted);
 }
 
 .top-action-btn,
@@ -402,15 +402,44 @@ const emit = defineEmits<{
 .intro-copy p {
   margin: 0;
   max-width: 720px;
-  color: rgba(31, 45, 51, 0.68);
+  color: var(--text-soft);
+}
+
+.intro-copy a {
+  color: rgb(var(--v-theme-primary));
+  text-decoration: underline;
+  text-decoration-color: rgba(var(--v-theme-primary), 0.32);
+  text-underline-offset: 0.16em;
+  transition:
+    color 160ms ease,
+    text-decoration-color 160ms ease;
+}
+
+.intro-copy a:visited {
+  color: rgb(var(--v-theme-primary));
+}
+
+.intro-copy a:hover,
+.intro-copy a:focus-visible {
+  color: rgb(var(--v-theme-accent));
+  text-decoration-color: rgba(var(--v-theme-accent), 0.6);
+}
+
+.intro-copy a[target='_blank']::after {
+  content: '↗';
+  display: inline-block;
+  margin-left: 0.18em;
+  font-size: 0.82em;
+  line-height: 1;
+  transform: translateY(-0.04em);
 }
 
 .eyebrow {
   display: inline-block;
   padding: 4px 10px;
   border-radius: 999px;
-  background: rgba(70, 106, 116, 0.1);
-  color: #466a74;
+  background: var(--theme-fill-secondary);
+  color: rgb(var(--v-theme-secondary));
   font-size: 0.82rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -429,7 +458,7 @@ const emit = defineEmits<{
 .top-meta {
   margin-top: 18px;
   padding-top: 18px;
-  border-top: 1px solid rgba(130, 104, 76, 0.12);
+  border-top: 1px solid var(--theme-border-soft);
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 16px;
@@ -453,7 +482,7 @@ const emit = defineEmits<{
 }
 
 .meta-text {
-  color: rgba(31, 45, 51, 0.6);
+  color: var(--text-muted);
   font-size: 0.92rem;
 }
 
@@ -469,8 +498,8 @@ const emit = defineEmits<{
   align-items: center;
   padding: 6px 12px;
   border-radius: 999px;
-  background: rgba(191, 125, 69, 0.16);
-  color: #8e4b2a;
+  background: var(--theme-fill-soft);
+  color: rgb(var(--v-theme-primary));
   font-size: 0.88rem;
   white-space: nowrap;
 }

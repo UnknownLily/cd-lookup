@@ -110,8 +110,8 @@ const emit = defineEmits<{
   grid-template-columns: 188px minmax(0, 1fr);
   gap: 0;
   overflow: hidden;
-  border: 1px solid rgba(130, 104, 76, 0.12);
-  background: rgba(255, 250, 244, 0.98);
+  border: 1px solid var(--theme-border-soft);
+  background: var(--surface-panel-strong);
 }
 
 .result-action-btn,
@@ -119,11 +119,26 @@ const emit = defineEmits<{
   border-radius: var(--search-control-radius);
 }
 
+.result-action-btn {
+  color: rgb(var(--v-theme-primary)) !important;
+  background: rgba(var(--v-theme-primary), 0.12) !important;
+  border: 1px solid rgba(var(--v-theme-primary), 0.1);
+}
+
+.result-action-btn :deep(.v-btn__content),
+.result-action-btn :deep(.v-icon) {
+  color: inherit;
+}
+
+.result-link-btn {
+  opacity: 0.78;
+}
+
 .list-cover {
   display: grid;
   place-items: center;
   padding: 16px 10px;
-  background: linear-gradient(180deg, rgba(70, 106, 116, 0.08), rgba(142, 75, 42, 0.04));
+  background: linear-gradient(180deg, rgba(var(--v-theme-accent), 0.1), rgba(var(--v-theme-primary), 0.08));
 }
 
 .list-cover-frame {
@@ -144,7 +159,7 @@ const emit = defineEmits<{
   min-height: 156px;
   display: grid;
   place-items: center;
-  color: rgba(31, 45, 51, 0.55);
+  color: var(--text-muted);
 }
 
 .list-body {
@@ -177,9 +192,9 @@ const emit = defineEmits<{
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 82% 24%, rgba(206, 170, 123, 0.28), transparent 22%),
-    radial-gradient(circle at 74% 68%, rgba(101, 70, 124, 0.14), transparent 28%),
-    linear-gradient(90deg, rgba(255, 250, 244, 0.95) 0%, rgba(255, 250, 244, 0.9) 36%, rgba(250, 244, 236, 0.72) 66%, rgba(245, 235, 224, 0.58) 100%);
+    radial-gradient(circle at 82% 24%, rgba(var(--v-theme-accent), 0.18), transparent 22%),
+    radial-gradient(circle at 74% 68%, rgba(var(--v-theme-secondary), 0.1), transparent 28%),
+    linear-gradient(90deg, rgba(255, 248, 250, 0.95) 0%, rgba(255, 246, 249, 0.9) 34%, rgba(249, 236, 242, 0.74) 64%, rgba(246, 229, 236, 0.58) 100%);
 }
 
 .list-header {
@@ -197,14 +212,14 @@ const emit = defineEmits<{
 
 .list-header p {
   margin: 6px 0 0;
-  color: rgba(31, 45, 51, 0.68);
+  color: var(--text-soft);
 }
 
 .list-meta {
   display: flex;
   flex-wrap: wrap;
   gap: 8px 14px;
-  color: rgba(31, 45, 51, 0.6);
+  color: var(--text-muted);
   font-size: 0.92rem;
 }
 
@@ -213,7 +228,7 @@ const emit = defineEmits<{
   flex-wrap: wrap;
   gap: 8px 10px;
   margin-top: 10px;
-  color: rgba(31, 45, 51, 0.56);
+  color: var(--text-muted);
   font-size: 0.86rem;
 }
 
@@ -238,7 +253,7 @@ const emit = defineEmits<{
 }
 
 .dense-section strong {
-  color: rgba(31, 45, 51, 0.64);
+  color: var(--text-soft);
   font-size: 0.86rem;
 }
 

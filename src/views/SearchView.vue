@@ -186,7 +186,7 @@ watch(
 .page-main {
   min-height: 100vh;
   background:
-    radial-gradient(circle at top, rgba(212, 169, 117, 0.1), transparent 30%),
+    radial-gradient(circle at top, rgba(var(--v-theme-primary), 0.1), transparent 30%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0));
 }
 
@@ -229,17 +229,17 @@ watch(
 }
 
 .sidebar::-webkit-scrollbar-track {
-  background: rgba(130, 104, 76, 0.08);
+  background: rgba(var(--v-theme-primary), 0.08);
   border-radius: 999px;
 }
 
 .sidebar::-webkit-scrollbar-thumb {
-  background: rgba(130, 104, 76, 0.28);
+  background: rgba(var(--v-theme-primary), 0.28);
   border-radius: 999px;
 }
 
 .sidebar::-webkit-scrollbar-thumb:hover {
-  background: rgba(130, 104, 76, 0.4);
+  background: rgba(var(--v-theme-primary), 0.4);
 }
 
 .drawer-inner {

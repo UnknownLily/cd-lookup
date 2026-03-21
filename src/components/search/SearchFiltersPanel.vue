@@ -143,9 +143,9 @@ function draftValues(key: ListFilterKey): string[] {
 
 :deep(.v-expansion-panel) {
   overflow: hidden;
-  border: 1px solid rgba(130, 104, 76, 0.12);
-  background: rgba(255, 250, 244, 0.88);
-  box-shadow: 0 16px 30px rgba(61, 49, 39, 0.05);
+  border: 1px solid var(--theme-border-soft);
+  background: var(--surface-panel-muted);
+  box-shadow: var(--shadow-soft);
   border-radius: 28px !important;
 }
 
@@ -185,7 +185,7 @@ function draftValues(key: ListFilterKey): string[] {
 
 .filters-head p {
   margin: 8px 0 0;
-  color: rgba(31, 45, 51, 0.62);
+  color: var(--text-soft);
 }
 
 .group-title {
@@ -193,7 +193,7 @@ function draftValues(key: ListFilterKey): string[] {
 }
 
 .group-description {
-  color: rgba(31, 45, 51, 0.56);
+  color: var(--text-muted);
   font-size: 0.92rem;
   margin-top: 4px;
 }
@@ -219,14 +219,14 @@ function draftValues(key: ListFilterKey): string[] {
 
 .filter-head p {
   margin: 4px 0 0;
-  color: rgba(31, 45, 51, 0.56);
+  color: var(--text-muted);
   font-size: 0.9rem;
 }
 
 .range-edge {
   min-width: 50px;
   text-align: center;
-  color: rgba(31, 45, 51, 0.56);
+  color: var(--text-muted);
   font-size: 0.9rem;
 }
 
@@ -235,9 +235,9 @@ function draftValues(key: ListFilterKey): string[] {
 }
 
 :deep(.selected-chip) {
-  background: rgba(142, 75, 42, 0.14);
-  color: #8e4b2a;
-  border-color: rgba(142, 75, 42, 0.28);
+  background: var(--theme-fill-soft);
+  color: rgb(var(--v-theme-primary));
+  border-color: rgba(var(--v-theme-primary), 0.28);
 }
 
 .filter-chip-group {
