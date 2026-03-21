@@ -12,6 +12,7 @@ import {
   mdiMagnifyScan,
   mdiOpenInNew,
   mdiPlusCircleOutline,
+  mdiTranslate,
   mdiTuneVariant,
   mdiViewGridOutline,
 } from '@mdi/js'
@@ -32,6 +33,7 @@ const iconAliases = {
   addFilter: mdiPlusCircleOutline,
   applyFilter: mdiFilterOutline,
   closeCircle: mdiCloseCircleOutline,
+  language: mdiTranslate,
 }
 
 export const vuetify = createVuetify({

@@ -259,18 +259,19 @@ const emit = defineEmits<{
           offset="10"
         >
           <template #activator="{ props: menuProps }">
-            <div class="locale-field-wrap">
-              <div class="locale-field-label">{{ t('locale.label') }}</div>
-              <v-btn
-                v-bind="menuProps"
-                class="locale-select"
-                variant="outlined"
-                rounded="xl"
-                append-icon="$expand"
-              >
-                {{ currentLocaleTitle }}
-              </v-btn>
-            </div>
+            <v-btn
+              v-bind="menuProps"
+              class="locale-select"
+              variant="outlined"
+              rounded="xl"
+              append-icon="$expand"
+              :aria-label="`${t('locale.label')} ${currentLocaleTitle}`"
+            >
+              <span class="locale-select-icon" aria-hidden="true">
+                <v-icon icon="$language" size="18" />
+              </span>
+              <span class="locale-select-value">{{ currentLocaleTitle }}</span>
+            </v-btn>
           </template>
 
           <v-card class="keyword-menu locale-menu-card" rounded="xl" variant="flat">
@@ -384,21 +385,10 @@ const emit = defineEmits<{
   align-items: center;
 }
 
-.locale-field-wrap {
-  min-width: 176px;
-}
-
-.locale-field-label {
-  margin-bottom: 6px;
-  padding-left: 4px;
-  color: var(--text-soft);
-  font-size: 0.82rem;
-}
-
 .locale-select {
-  width: 100%;
+  min-width: 176px;
   min-height: 54px;
-  justify-content: space-between;
+  justify-content: flex-start;
   padding-inline: 18px;
   border-radius: var(--search-input-radius);
   border-color: rgba(41, 60, 64, 0.72) !important;
@@ -414,15 +404,36 @@ const emit = defineEmits<{
 }
 
 .locale-select :deep(.v-btn__content) {
-  justify-content: space-between;
+  justify-content: flex-start;
   width: 100%;
+  gap: 12px;
   font-size: 1rem;
   font-weight: 500;
 }
 
 .locale-select :deep(.v-btn__append) {
-  margin-inline-start: 12px;
+  margin-inline-start: auto;
   color: rgba(31, 45, 51, 0.48);
+}
+
+.locale-select-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.125rem;
+  height: 1.125rem;
+  color: var(--text-soft);
+  line-height: 1;
+  flex: 0 0 auto;
+}
+
+.locale-select-icon :deep(.v-icon) {
+  display: block;
+  font-size: 18px;
+}
+
+.locale-select-value {
+  color: var(--text-strong);
 }
 
 .quick-tag-chip {
@@ -724,6 +735,23 @@ const emit = defineEmits<{
   display: none;
 }
 
+.mobile-filters {
+  border-radius: var(--search-input-radius) !important;
+  border-color: rgba(41, 60, 64, 0.72) !important;
+  padding-inline: 18px;
+}
+
+.mobile-filters :deep(.v-btn__overlay),
+.mobile-filters :deep(.v-btn__underlay) {
+  border-radius: var(--search-input-radius);
+}
+
+.mobile-filters:hover,
+.mobile-filters:focus-visible {
+  border-color: rgba(41, 60, 64, 0.88) !important;
+  background: rgba(255, 255, 255, 0.34) !important;
+}
+
 @media (max-width: 960px) {
   .top-bar {
     padding: 20px;
@@ -749,8 +777,30 @@ const emit = defineEmits<{
   }
 
   .top-actions {
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: end;
+    column-gap: 14px;
+    row-gap: 10px;
     min-height: 0;
+  }
+
+  .mobile-filters {
+    display: inline-flex;
+    order: 1;
+    align-self: end;
+    min-height: 54px;
+  }
+
+  .locale-select {
+    order: 2;
+    min-width: 0;
+  }
+
+  .top-status-pill-slot {
+    order: 3;
+    grid-column: 1 / -1;
+    width: 100%;
   }
 
   .status-panel {
@@ -763,10 +813,6 @@ const emit = defineEmits<{
 
   .status-pill-slot {
     min-width: 0;
-  }
-
-  .mobile-filters {
-    display: inline-flex;
   }
 }
 </style>
