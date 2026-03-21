@@ -9,7 +9,7 @@ export const messages = {
       introAfterLink: '抓取并整理同人音乐专辑信息，支持按制作方、发售展会、发行年份、原曲、编曲、演唱等条件快速筛选。',
       wikiAction: '前往 Wiki',
       noCover: '暂无封面',
-      aliasPrefix: '别名：',
+      aliasPrefix: '专辑：',
     },
     locale: {
       label: '语言',
@@ -197,7 +197,7 @@ export const messages = {
       introAfterLink: '抓取並整理同人音樂專輯資訊，支援按製作方、發售展會、發行年份、原曲、編曲、演唱等條件快速篩選。',
       wikiAction: '前往 Wiki',
       noCover: '暫無封面',
-      aliasPrefix: '別名：',
+      aliasPrefix: '專輯：',
     },
     locale: {
       label: '語言', zhHans: '简体中文', zhHant: '繁體中文', ja: '日本語', en: 'English', menuDescription: '切換後會立即更新介面文案，不影響目前的篩選條件。',
@@ -259,7 +259,7 @@ export const messages = {
   },
   ja: {
     app: {
-      title: '同人音楽アルバム検索', subtitle: 'THBWiki データを利用した東方同人音楽アルバム検索ツール', altName: 'THB Music Lookup', introBeforeLink: '', introLinkText: 'THBWiki の対応ページ', introAfterLink: 'をもとに同人音楽アルバム情報を整理し、制作サークル、頒布イベント、発売年、原曲、編曲、ボーカルなどの条件で素早く絞り込めます。', wikiAction: 'Wiki を開く', noCover: 'ジャケットなし', aliasPrefix: '別名: ',
+      title: '同人音楽アルバム検索', subtitle: 'THBWiki データを利用した東方同人音楽アルバム検索ツール', altName: 'THB Music Lookup', introBeforeLink: '', introLinkText: 'THBWiki の対応ページ', introAfterLink: 'をもとに同人音楽アルバム情報を整理し、制作サークル、頒布イベント、発売年、原曲、編曲、ボーカルなどの条件で素早く絞り込めます。', wikiAction: 'Wiki を開く', noCover: 'ジャケットなし', aliasPrefix: 'アルバム：',
     },
     locale: { label: '言語', zhHans: '简体中文', zhHant: '繁體中文', ja: '日本語', en: 'English', menuDescription: '切り替えると画面の文言がすぐに更新され、現在の絞り込み条件は保持されます。' },
     actions: { filter: '絞り込み', applyFilters: '条件を適用', clearFilters: '条件をクリア', close: '閉じる', cancel: 'キャンセル', loadMore: 'さらに読み込む', copyText: 'テキストをコピー', addToFilters: '条件に追加', setAsFilter: 'この条件で設定' },
@@ -297,7 +297,7 @@ export const messages = {
   },
   en: {
     app: {
-      title: 'Doujin Music Album Search', subtitle: 'A Touhou doujin music album lookup tool powered by THBWiki data', altName: 'THB Music Lookup', introBeforeLink: 'Built from ', introLinkText: 'the corresponding THBWiki entries', introAfterLink: ', this tool organizes doujin music album data and lets you filter quickly by circle, event, release year, original track, arrangement, vocal, and more.', wikiAction: 'Open Wiki', noCover: 'No cover', aliasPrefix: 'Alias: ',
+      title: 'Doujin Music Album Search', subtitle: 'A Touhou doujin music album lookup tool powered by THBWiki data', altName: 'THB Music Lookup', introBeforeLink: 'Built from ', introLinkText: 'the corresponding THBWiki entries', introAfterLink: ', this tool organizes doujin music album data and lets you filter quickly by circle, event, release year, original track, arrangement, vocal, and more.', wikiAction: 'Open Wiki', noCover: 'No cover', aliasPrefix: 'Album: ',
     },
     locale: { label: 'Language', zhHans: '简体中文', zhHant: '繁體中文', ja: '日本語', en: 'English', menuDescription: 'Changing the language updates the interface immediately and keeps your current filters intact.' },
     actions: { filter: 'Filters', applyFilters: 'Apply Filters', clearFilters: 'Clear Filters', close: 'Close', cancel: 'Cancel', loadMore: 'Load More', copyText: 'Copy Text', addToFilters: 'Add To Filters', setAsFilter: 'Set As Filter' },
