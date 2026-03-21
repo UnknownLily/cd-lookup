@@ -144,7 +144,7 @@ onBeforeUnmount(() => {
     hide-selected
     hide-no-data
     no-filter
-    menu-icon="mdi-magnify"
+    menu-icon="$search"
     @update:search="search = String($event ?? '')"
     @update:model-value="handleModelValue"
   >

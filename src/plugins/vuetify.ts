@@ -1,11 +1,47 @@
 import 'vuetify/lib/styles/main.css'
 import { createVuetify } from 'vuetify'
-import * as components from 'vuetify/components'
-import * as directives from 'vuetify/directives'
+import {
+  mdiAlertCircleOutline,
+  mdiChevronDown,
+  mdiCloseCircleOutline,
+  mdiContentCopy,
+  mdiFileSearchOutline,
+  mdiFilterOutline,
+  mdiFormatListBulleted,
+  mdiMagnify,
+  mdiMagnifyScan,
+  mdiOpenInNew,
+  mdiPlusCircleOutline,
+  mdiTuneVariant,
+  mdiViewGridOutline,
+} from '@mdi/js'
+import { aliases, mdi } from 'vuetify/iconsets/mdi-svg'
+
+const iconAliases = {
+  ...aliases,
+  search: mdiMagnify,
+  expand: mdiChevronDown,
+  filters: mdiTuneVariant,
+  viewCard: mdiViewGridOutline,
+  viewList: mdiFormatListBulleted,
+  externalLink: mdiOpenInNew,
+  searchScan: mdiMagnifyScan,
+  alertCircleOutline: mdiAlertCircleOutline,
+  fileSearchOutline: mdiFileSearchOutline,
+  copyContent: mdiContentCopy,
+  addFilter: mdiPlusCircleOutline,
+  applyFilter: mdiFilterOutline,
+  closeCircle: mdiCloseCircleOutline,
+}
 
 export const vuetify = createVuetify({
-  components,
-  directives,
+  icons: {
+    defaultSet: 'mdi',
+    aliases: iconAliases,
+    sets: {
+      mdi,
+    },
+  },
   theme: {
     defaultTheme: 'archive',
     themes: {

@@ -65,19 +65,19 @@ onBeforeUnmount(() => {
     </header>
 
     <div v-if="status === 'idle'" class="results-empty">
-      <v-icon icon="mdi-magnify-scan" size="40" />
+      <v-icon icon="$searchScan" size="40" />
       <h3>先设定筛选条件再开始查询</h3>
       <p>由于后端响应较慢，建议先用年份、制作方、作品类型等条件缩小范围，再点击应用。</p>
     </div>
 
     <div v-else-if="status === 'error' && results.length === 0" class="results-empty">
-      <v-icon icon="mdi-alert-circle-outline" size="40" />
+      <v-icon icon="$alertCircleOutline" size="40" />
       <h3>请求失败</h3>
       <p>后端接口当前没有返回可用结果，请稍后重试或收窄筛选范围。</p>
     </div>
 
     <div v-else-if="status === 'empty'" class="results-empty">
-      <v-icon icon="mdi-file-search-outline" size="40" />
+      <v-icon icon="$fileSearchOutline" size="40" />
       <h3>没有匹配结果</h3>
       <p>可以尝试放宽年份范围、减少标签限制，或切换到不同的关键词组合。</p>
     </div>

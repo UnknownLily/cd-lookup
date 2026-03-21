@@ -156,7 +156,7 @@ const emit = defineEmits<{
               persistent-hint
               label="快捷标签"
               placeholder="输入制作方、发售展会或封面角色，应用时会自动归入筛选"
-              prepend-inner-icon="mdi-magnify"
+              prepend-inner-icon="$search"
               clearable
               @update:model-value="handleKeywordInput"
               @focus="handleKeywordFocus"
@@ -175,7 +175,7 @@ const emit = defineEmits<{
                   <v-btn
                     variant="text"
                     density="comfortable"
-                    icon="mdi-chevron-down"
+                    icon="$expand"
                     class="keyword-toggle"
                     @click.stop="suggestionMenuOpen = !suggestionMenuOpen"
                   />
@@ -220,7 +220,7 @@ const emit = defineEmits<{
       </div>
 
       <div class="top-actions">
-        <v-btn class="mobile-filters top-action-btn" variant="outlined" prepend-icon="mdi-tune-variant" @click="emit('openFilters')">
+        <v-btn class="mobile-filters top-action-btn" variant="outlined" prepend-icon="$filters" @click="emit('openFilters')">
           筛选
         </v-btn>
 
@@ -231,8 +231,8 @@ const emit = defineEmits<{
           :model-value="viewMode"
           @update:model-value="emit('updateViewMode', $event)"
         >
-          <v-btn value="card" icon="mdi-view-grid-outline" aria-label="卡片布局" />
-          <v-btn value="list" icon="mdi-format-list-bulleted" aria-label="列表布局" />
+          <v-btn value="card" icon="$viewCard" aria-label="卡片布局" />
+          <v-btn value="list" icon="$viewList" aria-label="列表布局" />
         </v-btn-toggle>
 
         <v-btn class="top-action-btn" color="primary" :loading="isLoading" :disabled="!canSearch" @click="emit('apply')">

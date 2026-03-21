@@ -47,21 +47,21 @@ function setAsFilter(): void {
 
     <v-list class="tag-menu-list" min-width="220" density="compact" rounded="xl">
       <v-list-subheader>{{ tag.label }}</v-list-subheader>
-      <v-list-item prepend-icon="mdi-content-copy" title="复制文本" @click="copyValue" />
+      <v-list-item prepend-icon="$copyContent" title="复制文本" @click="copyValue" />
       <v-list-item
-        prepend-icon="mdi-plus-circle-outline"
+        prepend-icon="$addFilter"
         title="添加进筛选条件"
         :disabled="!tag.filterable"
         @click="addToFilter"
       />
       <v-list-item
-        prepend-icon="mdi-filter-outline"
+        prepend-icon="$applyFilter"
         title="设置为筛选条件"
         :disabled="!tag.filterable"
         @click="setAsFilter"
       />
       <v-divider class="my-1" />
-      <v-list-item prepend-icon="mdi-close-circle-outline" title="取消" @click="open = false" />
+      <v-list-item prepend-icon="$closeCircle" title="取消" @click="open = false" />
     </v-list>
   </v-menu>
 </template>
