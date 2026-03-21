@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { getKeywordSuggestions, type KeywordSuggestion } from '../../services/keywordResolver'
-import type { SearchTag, ViewMode } from '../../types/search'
+import type { SearchTag } from '../../types/search'
 
 const props = defineProps<{
   keyword: string
   quickTags: SearchTag[]
-  viewMode: ViewMode
   summary: string[]
   totalCount: number
   canSearch: boolean
@@ -124,7 +123,6 @@ const emit = defineEmits<{
   openFilters: []
   addQuickTag: [tag: SearchTag]
   removeQuickTag: [tag: SearchTag]
-  updateViewMode: [mode: ViewMode]
 }>()
 </script>
 
@@ -224,18 +222,7 @@ const emit = defineEmits<{
           筛选
         </v-btn>
 
-        <v-btn-toggle
-          class="view-toggle"
-          mandatory
-          divided
-          :model-value="viewMode"
-          @update:model-value="emit('updateViewMode', $event)"
-        >
-          <v-btn value="card" icon="$viewCard" aria-label="卡片布局" />
-          <v-btn value="list" icon="$viewList" aria-label="列表布局" />
-        </v-btn-toggle>
-
-        <v-btn class="top-action-btn" color="primary" :loading="isLoading" :disabled="!canSearch" @click="emit('apply')">
+        <v-btn class="top-action-btn apply-action-btn" color="primary" :loading="isLoading" :disabled="!canSearch" @click="emit('apply')">
           应用筛选
         </v-btn>
         <v-btn class="top-action-btn" variant="text" @click="emit('clear')">清空</v-btn>
@@ -381,6 +368,22 @@ const emit = defineEmits<{
 .top-action-btn :deep(.v-btn__overlay),
 .top-action-btn :deep(.v-btn__underlay) {
   border-radius: inherit;
+}
+
+.apply-action-btn.v-btn--disabled {
+  background-color: rgba(var(--v-theme-primary), 0.12) !important;
+  color: rgba(79, 34, 48, 0.38) !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+}
+
+.apply-action-btn.v-btn--disabled .v-btn__content {
+  color: inherit !important;
+}
+
+.apply-action-btn.v-btn--disabled .v-btn__overlay,
+.apply-action-btn.v-btn--disabled .v-btn__underlay {
+  opacity: 0 !important;
 }
 
 .view-toggle :deep(.v-btn) {

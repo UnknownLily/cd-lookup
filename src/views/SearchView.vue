@@ -112,7 +112,6 @@ watch(
         <SearchTopBar
           :keyword="store.draftCriteria.keyword"
           :quick-tags="store.quickTags"
-          :view-mode="store.viewMode"
           :summary="store.appliedSummary"
           :total-count="store.totalCount"
           :can-search="store.canSearch"
@@ -125,7 +124,6 @@ watch(
           @open-filters="mobileFiltersOpen = true"
           @add-quick-tag="handleQuickTagAdd"
           @remove-quick-tag="handleQuickTagRemove"
-          @update-view-mode="updateViewMode"
         />
 
         <v-alert
@@ -162,6 +160,7 @@ watch(
               @load-more="store.loadMore"
               @add-tag="handleTagAdd"
               @set-tag="handleTagSet"
+              @update-view-mode="updateViewMode"
             />
           </section>
         </div>

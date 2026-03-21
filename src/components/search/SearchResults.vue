@@ -18,6 +18,7 @@ const emit = defineEmits<{
   loadMore: []
   addTag: [tag: SearchTag]
   setTag: [tag: SearchTag]
+  updateViewMode: [mode: ViewMode]
 }>()
 
 const sentinel = ref<HTMLDivElement | null>(null)
@@ -57,11 +58,26 @@ onBeforeUnmount(() => {
 <template>
   <section class="results-panel">
     <header class="results-head">
-      <div>
+      <div class="results-title-block">
         <h2>结果展示</h2>
         <p>默认卡片布局，支持切换到高密度列表布局。</p>
       </div>
-      <div class="results-count">{{ totalCount > 0 ? `已返回 ${results.length} / ${totalCount}` : '等待查询' }}</div>
+      <div class="results-toolbar">
+        <div class="results-count">{{ totalCount > 0 ? `已返回 ${results.length} / ${totalCount}` : '等待查询' }}</div>
+        <div class="view-switcher">
+          <span class="view-switcher-label">布局</span>
+          <v-btn-toggle
+            class="view-toggle"
+            mandatory
+            divided
+            :model-value="viewMode"
+            @update:model-value="emit('updateViewMode', $event)"
+          >
+            <v-btn value="card" icon="$viewCard" aria-label="卡片布局" />
+            <v-btn value="list" icon="$viewList" aria-label="列表布局" />
+          </v-btn-toggle>
+        </div>
+      </div>
     </header>
 
     <div v-if="status === 'idle'" class="results-empty">
@@ -159,6 +175,10 @@ onBeforeUnmount(() => {
   align-items: end;
 }
 
+.results-title-block {
+  min-width: 0;
+}
+
 .results-head h2 {
   margin: 0;
   font-family: 'Noto Serif SC', 'Source Han Serif SC', serif;
@@ -173,6 +193,59 @@ onBeforeUnmount(() => {
 .results-count {
   color: rgba(31, 45, 51, 0.58);
   font-size: 0.95rem;
+}
+
+.results-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  justify-content: end;
+}
+
+.view-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px 8px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(var(--v-theme-primary), 0.14);
+  background: rgba(255, 250, 244, 0.88);
+  box-shadow: 0 10px 24px rgba(92, 52, 68, 0.08);
+}
+
+.view-switcher-label {
+  color: rgba(31, 45, 51, 0.62);
+  font-size: 0.9rem;
+  letter-spacing: 0.04em;
+}
+
+.view-toggle {
+  flex-shrink: 0;
+}
+
+.view-toggle :deep(.v-btn) {
+  min-width: 44px;
+  color: rgba(31, 45, 51, 0.62);
+  transition: background-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+.view-toggle :deep(.v-btn:hover) {
+  color: rgba(31, 45, 51, 0.82);
+}
+
+.view-toggle :deep(.v-btn--active) {
+  color: rgb(var(--v-theme-primary));
+  background: rgba(var(--v-theme-primary), 0.12);
+  box-shadow: inset 0 0 0 1px rgba(var(--v-theme-primary), 0.18), 0 8px 20px rgba(92, 52, 68, 0.12);
+}
+
+.view-toggle :deep(.v-btn--active:hover) {
+  color: rgb(var(--v-theme-primary));
+}
+
+.view-toggle :deep(.v-btn--active .v-icon) {
+  transform: scale(1.05);
 }
 
 .results-grid {
@@ -307,6 +380,15 @@ onBeforeUnmount(() => {
   .results-head {
     flex-direction: column;
     align-items: start;
+  }
+
+  .results-toolbar {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .view-switcher {
+    padding-left: 12px;
   }
 
   .list-skeleton {
