@@ -33,6 +33,7 @@ const selectedSuggestionItems = computed<KeywordSuggestion[]>(() =>
     fieldLabel: tag.label,
   })),
 )
+const selectedSuggestionKeys = computed(() => new Set(selectedSuggestionItems.value.map((item) => `${item.key}::${item.value}`)))
 
 const suggestionItems = ref<KeywordSuggestion[]>([])
 const suggestionLoading = ref(false)
@@ -46,7 +47,7 @@ async function loadSuggestions(term: string): Promise<void> {
 
   if (!term.trim()) {
     suggestionItems.value = []
-    suggestionHint.value = '输入制作方、发售展会或封面角色后，可直接从下拉建议中选择。'
+    suggestionHint.value = '输入制作方、发售展会、原曲或参与者后，可直接从下拉建议中选择。'
     suggestionLoading.value = false
     suggestionMenuOpen.value = false
     return
@@ -57,10 +58,15 @@ async function loadSuggestions(term: string): Promise<void> {
   suggestionHint.value = '正在加载自动归类建议…'
 
   try {
-    suggestionItems.value = await getKeywordSuggestions(term, currentController.signal)
+    const nextSuggestions = await getKeywordSuggestions(term, currentController.signal)
+    suggestionItems.value = nextSuggestions.filter((item) => !selectedSuggestionKeys.value.has(`${item.key}::${item.value}`))
     suggestionMenuOpen.value = suggestionItems.value.length > 0
     suggestionHint.value = suggestionItems.value.length > 0
-      ? '建议项会显示它将归入的筛选字段。'
+      ? suggestionItems.value.length === 1
+        ? '当前只有一个明确建议，按回车可直接加入筛选。'
+        : '建议项会显示它将归入的筛选字段。'
+      : nextSuggestions.length > 0
+        ? '匹配到的建议已在当前筛选中。'
       : '没有找到建议项，你仍可直接输入后再应用。'
   } catch (error) {
     if (!(error instanceof DOMException && error.name === 'AbortError')) {
@@ -100,6 +106,15 @@ function handleSuggestionPick(item: KeywordSuggestion): void {
     filterable: true,
   })
   emit('updateKeyword', '')
+}
+
+function handleKeywordEnter(): void {
+  if (!suggestionLoading.value && props.keyword.trim() && suggestionItems.value.length === 1) {
+    handleSuggestionPick(suggestionItems.value[0])
+    return
+  }
+
+  emit('apply')
 }
 
 function handleKeywordFocus(): void {
@@ -153,13 +168,13 @@ const emit = defineEmits<{
               :hint="suggestionHint"
               persistent-hint
               label="快捷标签"
-              placeholder="输入制作方、发售展会或封面角色，应用时会自动归入筛选"
+              placeholder="输入制作方、原曲、原曲出处或参与者，应用时会自动归入筛选"
               prepend-inner-icon="$search"
               clearable
               @update:model-value="handleKeywordInput"
               @focus="handleKeywordFocus"
               @click:clear="emit('updateKeyword', '')"
-              @keyup.enter="emit('apply')"
+              @keyup.enter="handleKeywordEnter"
             >
               <template #append-inner>
                 <div class="keyword-actions">

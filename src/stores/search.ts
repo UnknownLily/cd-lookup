@@ -7,6 +7,7 @@ import { resolveKeywordCriteria } from '../services/keywordResolver'
 import { buildSearchRouteQuery, parseSearchRouteQuery } from '../services/searchRoute'
 import {
   FIELD_LABELS,
+  LIST_FILTER_KEYS,
   cloneCriteria,
   createDefaultCriteria,
   hasActiveCriteria,
@@ -23,7 +24,7 @@ import {
 } from '../types/search'
 
 const PAGE_SIZE = 24
-const QUICK_TAG_KEYS: ListFilterKey[] = ['circle', 'event', 'coverchar']
+const QUICK_TAG_KEYS: ListFilterKey[] = [...LIST_FILTER_KEYS]
 
 function normalizeError(error: unknown): string {
   if (error instanceof DOMException && error.name === 'AbortError') {

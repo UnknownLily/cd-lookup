@@ -191,7 +191,7 @@ export const RANGE_BOUNDS: Record<RangeFilterKey, { min: number; max: number }> 
   establish: { min: 2000, max: 2032 },
   year: { min: 2000, max: 2032 },
   time: { min: 0, max: 2100 },
-  ogmusicno: { min: 0, max: 20 },
+  ogmusicno: { min: 0, max: 30 },
   ogworkno: { min: 0, max: 20 },
 }
 

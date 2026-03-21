@@ -18,7 +18,9 @@ export interface KeywordResolutionResult {
   noticeMessage: string | null
 }
 
-const REMOTE_RESOLUTION_KEYS: ListFilterKey[] = ['circle', 'event', 'coverchar']
+const REMOTE_RESOLUTION_KEYS: ListFilterKey[] = ['circle', 'event', 'coverchar', 'ogmusic', 'ogwork', 'arrange', 'lyric', 'compose', 'vocal', 'script', 'dub']
+const CREDIT_RESOLUTION_KEYS = new Set<ListFilterKey>(['arrange', 'lyric', 'compose', 'vocal', 'script', 'dub', 'perform'])
+const SUGGESTION_PRIORITY: ListFilterKey[] = ['circle', 'event', 'coverchar', 'ogmusic', 'ogwork', 'region', 'work', 'state', 'property', 'rate', 'noth', 'original', 'style', 'only', 'arrange', 'lyric', 'compose', 'vocal', 'script', 'dub', 'perform']
 
 function normalizeTerm(value: string): string {
   return value.trim().toLocaleLowerCase('zh-CN')
@@ -32,6 +34,16 @@ function isLooseMatch(candidate: string, term: string): boolean {
   const normalizedCandidate = normalizeTerm(candidate)
   const normalizedTerm = normalizeTerm(term)
   return normalizedTerm.length > 0 && normalizedCandidate.includes(normalizedTerm)
+}
+
+function isCreditResolutionKey(key: ListFilterKey): boolean {
+  return CREDIT_RESOLUTION_KEYS.has(key)
+}
+
+function compareMatchPriority(left: KeywordMatch, right: KeywordMatch): number {
+  const leftIndex = SUGGESTION_PRIORITY.indexOf(left.key)
+  const rightIndex = SUGGESTION_PRIORITY.indexOf(right.key)
+  return leftIndex - rightIndex || left.value.localeCompare(right.value, 'zh-CN')
 }
 
 function createResolvedCriteria(criteria: SearchCriteriaDraft, match: KeywordMatch): SearchCriteriaDraft {
@@ -121,10 +133,35 @@ function dedupeMatches(matches: KeywordMatch[]): KeywordMatch[] {
   })
 }
 
+function sortMatches(matches: KeywordMatch[]): KeywordMatch[] {
+  return [...matches].sort(compareMatchPriority)
+}
+
+function selectPreferredMatch(matches: KeywordMatch[]): KeywordMatch | null {
+  const uniqueMatches = sortMatches(dedupeMatches(matches))
+  if (uniqueMatches.length === 1) {
+    return uniqueMatches[0]
+  }
+
+  const nonCreditMatches = uniqueMatches.filter((match) => !isCreditResolutionKey(match.key))
+  if (nonCreditMatches.length === 1) {
+    return nonCreditMatches[0]
+  }
+
+  return null
+}
+
 function formatAmbiguousFields(matches: KeywordMatch[]): string {
-  return dedupeMatches(matches)
+  return sortMatches(dedupeMatches(matches))
     .map((match) => FIELD_LABELS[match.key] ?? match.key)
     .join('、')
+}
+
+function formatAmbiguousCandidates(matches: KeywordMatch[]): string {
+  return sortMatches(dedupeMatches(matches))
+    .slice(0, 6)
+    .map((match) => `${FIELD_LABELS[match.key] ?? match.key}：${match.value}`)
+    .join('；')
 }
 
 function toSuggestion(match: KeywordMatch): KeywordSuggestion {
@@ -186,7 +223,7 @@ export async function getKeywordSuggestions(term: string, signal?: AbortSignal):
     }),
   )
 
-  return dedupeMatches(matches).slice(0, 12).map(toSuggestion)
+  return sortMatches(dedupeMatches(matches)).slice(0, 12).map(toSuggestion)
 }
 
 export async function resolveKeywordCriteria(criteria: SearchCriteriaDraft, signal?: AbortSignal): Promise<KeywordResolutionResult> {
@@ -201,29 +238,31 @@ export async function resolveKeywordCriteria(criteria: SearchCriteriaDraft, sign
   const staticMatches = collectStaticMatches(keyword)
   const remoteMatches = await collectRemoteMatches(keyword, signal)
   const exactMatches = dedupeMatches([...staticMatches, ...remoteMatches.exactMatches])
+  const preferredExactMatch = selectPreferredMatch(exactMatches)
 
-  if (exactMatches.length === 1) {
+  if (preferredExactMatch) {
     return {
-      criteria: createResolvedCriteria(criteria, exactMatches[0]),
-      noticeMessage: createNoticeMessage(keyword, exactMatches[0], 'exact'),
+      criteria: createResolvedCriteria(criteria, preferredExactMatch),
+      noticeMessage: createNoticeMessage(keyword, preferredExactMatch, 'exact'),
     }
   }
 
   if (exactMatches.length > 1) {
-    throw new Error(`关键词“${keyword}”同时匹配多个字段：${formatAmbiguousFields(exactMatches)}。请直接在筛选面板中选择。`)
+    throw new Error(`关键词“${keyword}”同时匹配多个字段：${formatAmbiguousFields(exactMatches)}。候选为：${formatAmbiguousCandidates(exactMatches)}。请从下拉建议中明确选择，或直接在筛选面板中添加。`)
   }
 
   const looseMatches = dedupeMatches(remoteMatches.looseMatches)
-  if (looseMatches.length === 1) {
+  const preferredLooseMatch = selectPreferredMatch(looseMatches)
+  if (preferredLooseMatch) {
     return {
-      criteria: createResolvedCriteria(criteria, looseMatches[0]),
-      noticeMessage: createNoticeMessage(keyword, looseMatches[0], 'loose'),
+      criteria: createResolvedCriteria(criteria, preferredLooseMatch),
+      noticeMessage: createNoticeMessage(keyword, preferredLooseMatch, 'loose'),
     }
   }
 
   if (looseMatches.length > 1) {
-    throw new Error(`关键词“${keyword}”存在多个候选标签，暂时无法自动归类。请改用筛选面板中的标签输入。`)
+    throw new Error(`关键词“${keyword}”存在多个候选标签：${formatAmbiguousCandidates(looseMatches)}。请从下拉建议中明确选择，或改用筛选面板中的标签输入。`)
   }
 
-  throw new Error(`关键词“${keyword}”未识别为可筛选标签。请输入制作方、发售展会或封面角色等明确名称，或直接在筛选面板中选择。`)
+  throw new Error(`关键词“${keyword}”未识别为可筛选标签。请输入制作方、发售展会、原曲、原曲出处或参与者名称，或直接在筛选面板中选择。`)
 }
