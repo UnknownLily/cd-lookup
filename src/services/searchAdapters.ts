@@ -13,9 +13,18 @@ import {
 } from '../types/search'
 
 const HIDDEN_FIELDS = new Set<ItemField | string>(['id', 'self', 'name', 'alname', 'time', 'cover'])
-const PRIMARY_TAG_FIELDS: ItemField[] = ['work', 'property', 'rate', 'region', 'event', 'coverchar']
+const PRIMARY_TAG_FIELDS: ItemField[] = ['arrange', 'vocal', 'lyric', 'ogmusic', 'ogwork', 'work', 'property', 'rate', 'region', 'event', 'coverchar']
 const DETAIL_FIELD_ORDER: ItemField[] = [
   'circle',
+  'arrange',
+  'vocal',
+  'lyric',
+  'ogmusic',
+  'ogwork',
+  'compose',
+  'perform',
+  'script',
+  'dub',
   'event',
   'coverchar',
   'work',
@@ -24,19 +33,10 @@ const DETAIL_FIELD_ORDER: ItemField[] = [
   'region',
   'state',
   'style',
-  'ogwork',
-  'ogworkno',
-  'ogmusic',
   'ogmusicno',
+  'ogworkno',
   'original',
   'noth',
-  'arrange',
-  'lyric',
-  'compose',
-  'vocal',
-  'script',
-  'dub',
-  'perform',
 ]
 
 function formatValue(typeId: DataTypeId, value: DataValueMap[DataTypeId]): string {
@@ -90,7 +90,7 @@ function buildDetailSections(item: RawItem): SearchDetailSection[] {
 }
 
 function buildPrimaryTags(item: RawItem): SearchTag[] {
-  return PRIMARY_TAG_FIELDS.flatMap((field) => buildTags(field, getValues(item, field))).slice(0, 8)
+  return PRIMARY_TAG_FIELDS.flatMap((field) => buildTags(field, getValues(item, field))).slice(0, 12)
 }
 
 function buildLinks(item: RawItem): SearchResultLink[] {

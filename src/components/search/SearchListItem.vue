@@ -59,16 +59,6 @@ const emit = defineEmits<{
           <span v-for="line in item.meta" :key="line">{{ line }}</span>
         </div>
 
-        <div v-if="item.primaryTags.length > 0" class="list-tags">
-          <TagActionMenu
-            v-for="tag in item.primaryTags"
-            :key="`${item.id}-${tag.field}-${tag.value}`"
-            :tag="tag"
-            @add="emit('addTag', $event)"
-            @set="emit('setTag', $event)"
-          />
-        </div>
-
         <div v-if="item.links.length > 0" class="list-links">
           <v-btn
             class="result-link-btn"
@@ -86,13 +76,14 @@ const emit = defineEmits<{
         </div>
 
         <div class="dense-sections">
-          <div v-for="section in item.detailSections.slice(0, 3)" :key="section.key" class="dense-section">
+          <div v-for="section in item.detailSections.slice(0, 8)" :key="section.key" class="dense-section">
             <strong>{{ section.label }}</strong>
             <div class="dense-tags">
               <TagActionMenu
-                v-for="tag in section.tags.slice(0, 6)"
+                v-for="tag in section.tags.slice(0, 4)"
                 :key="`${item.id}-${tag.field}-${tag.value}`"
                 :tag="tag"
+                compact
                 @add="emit('addTag', $event)"
                 @set="emit('setTag', $event)"
               />

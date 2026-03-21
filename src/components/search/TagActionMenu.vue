@@ -4,6 +4,7 @@ import type { SearchTag } from '../../types/search'
 
 const props = defineProps<{
   tag: SearchTag
+  compact?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -38,8 +39,10 @@ function setAsFilter(): void {
       <v-chip
         v-bind="activatorProps"
         class="tag-chip"
+        :class="{ 'tag-chip--compact': compact }"
         color="secondary"
         variant="tonal"
+        :size="compact ? 'small' : 'default'"
       >
         {{ tag.value }}
       </v-chip>
@@ -80,5 +83,10 @@ function setAsFilter(): void {
 
 .tag-menu-list :deep(.v-list-item) {
   border-radius: 14px;
+}
+
+.tag-chip--compact {
+  --v-chip-height: 28px;
+  font-size: 0.84rem;
 }
 </style>
