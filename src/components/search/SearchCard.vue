@@ -197,7 +197,14 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
     />
     <div v-if="item.coverUrl" class="card-image-wash" aria-hidden="true" />
 
-    <div class="card-cover">
+    <div
+      class="card-cover"
+      :class="{ 'card-cover--tappable': hasExpandableDetails }"
+      tabindex="0"
+      @click="toggleMobileExpanded"
+      @keyup.enter="toggleMobileExpanded"
+      @keyup.space.prevent="toggleMobileExpanded"
+    >
       <v-img v-if="item.coverUrl" :src="item.coverUrl" :alt="item.title" class="cover-image" cover height="320" />
       <div v-else class="cover-fallback">
         <span>{{ t('app.noCover') }}</span>
@@ -423,6 +430,10 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
   position: relative;
   z-index: 1;
   background: linear-gradient(180deg, rgba(var(--v-theme-accent), 0.1), rgba(var(--v-theme-primary), 0.08));
+}
+
+.card-cover--tappable {
+  cursor: pointer;
 }
 
 .card-cover::after {
@@ -688,6 +699,11 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
   .result-card {
     --mobile-card-peek-height: 172px;
     --mobile-card-expanded-max-height: 100%;
+    --mobile-detail-max-height: min(52vh, 360px);
+    --mobile-collapse-duration: 280ms;
+    --mobile-collapse-easing: cubic-bezier(0.4, 0, 0.2, 1);
+    --mobile-expand-duration: 200ms;
+    --mobile-expand-easing: cubic-bezier(0.2, 0.9, 0.3, 1);
     --card-link-color: rgba(31, 45, 51, 0.82);
     --card-link-opacity: 0.78;
     --card-title-color: rgba(31, 45, 51, 0.94);
@@ -701,8 +717,8 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
     --card-action-hover-bg: rgb(255, 223, 233);
     --card-action-hover-border: rgba(var(--v-theme-primary), 0.28);
     transform: none;
-    transition: border-color 160ms ease, box-shadow 160ms ease;
-    box-shadow: 0 12px 24px rgba(56, 44, 34, 0.05);
+    transition: border-color 120ms ease;
+    box-shadow: none;
   }
 
   .result-card.tone-dark,
@@ -728,12 +744,23 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
   .result-card:hover,
   .result-card:focus-within {
     transform: none;
-    box-shadow: 0 12px 24px rgba(56, 44, 34, 0.06);
+    box-shadow: none;
   }
 
   .cover-image,
   .cover-fallback {
     height: 216px !important;
+  }
+
+  .card-cover {
+    background: none;
+  }
+
+  .cover-image :deep(.v-img__img),
+  .cover-image :deep(.v-img__picture) {
+    transition: none;
+    -webkit-mask-image: none !important;
+    mask-image: none !important;
   }
 
   .card-cover::after,
@@ -744,7 +771,7 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
 
   .card-image-blur,
   .card-image-wash {
-    opacity: 0;
+    display: none;
   }
 
   .card-body {
@@ -760,9 +787,15 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
     overflow: hidden;
     transform: translateY(calc(100% - var(--mobile-card-peek-height)));
     gap: 10px;
-    background: rgba(255, 248, 251, 0.96);
+    background: rgba(255, 248, 251, 0.9);
     border-top: 1px solid rgba(var(--v-theme-primary), 0.12);
-    transition: transform 180ms ease;
+    will-change: transform;
+    transition: transform var(--mobile-collapse-duration) var(--mobile-collapse-easing);
+  }
+
+  .result-card:hover .card-hover,
+  .result-card:focus-within .card-hover {
+    transform: translateY(calc(100% - var(--mobile-card-peek-height)));
   }
 
   .card-summary {
@@ -802,7 +835,7 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
     width: 100%;
     min-width: 0;
     box-shadow: none;
-    transition: background-color 160ms ease, border-color 160ms ease;
+    transition: none;
   }
 
   .result-action-btn {
@@ -831,13 +864,26 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
     max-height: 0;
     opacity: 0;
     overflow: hidden;
-    transform: none;
+    transform: translateY(4px);
     padding-top: 0;
-    transition: max-height 180ms ease, opacity 160ms ease, margin-top 180ms ease;
+    transition:
+      max-height var(--mobile-collapse-duration) var(--mobile-collapse-easing),
+      opacity 220ms ease,
+      transform var(--mobile-collapse-duration) var(--mobile-collapse-easing),
+      margin-top 220ms ease;
+  }
+
+  .result-card:hover .detail-list,
+  .result-card:focus-within .detail-list {
+    max-height: 0;
+    opacity: 0;
+    transform: translateY(4px);
   }
 
   .result-card--mobile-expanded .card-hover {
     transform: translateY(0);
+    transition-duration: var(--mobile-expand-duration);
+    transition-timing-function: var(--mobile-expand-easing);
   }
 
   .result-card--mobile-expanded .card-hover::before,
@@ -848,17 +894,33 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
     opacity: 0;
   }
 
+  .result-card--mobile-expanded:hover .card-hover,
+  .result-card--mobile-expanded:focus-within .card-hover {
+    transform: translateY(0);
+  }
+
   .detail-list--mobile-open {
-    max-height: none;
+    max-height: var(--mobile-detail-max-height);
     opacity: 1;
     overflow-y: auto;
     overflow-x: hidden;
     overscroll-behavior: auto;
     -webkit-overflow-scrolling: touch;
-    transform: none;
+    transform: translateY(0);
     margin-top: 2px;
     padding-inline-end: 2px;
     scrollbar-width: thin;
+    transition-duration: var(--mobile-expand-duration), 160ms, var(--mobile-expand-duration), 160ms;
+    transition-timing-function: var(--mobile-expand-easing), ease-out, var(--mobile-expand-easing), ease-out;
+  }
+
+  .result-card--mobile-expanded:hover .detail-list,
+  .result-card--mobile-expanded:focus-within .detail-list,
+  .result-card:hover .detail-list--mobile-open,
+  .result-card:focus-within .detail-list--mobile-open {
+    max-height: var(--mobile-detail-max-height);
+    opacity: 1;
+    transform: translateY(0);
   }
 
   .result-action-btn:hover,
@@ -876,6 +938,13 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
   .detail-list--mobile-open::-webkit-scrollbar-thumb {
     background: rgba(var(--v-theme-primary), 0.2);
     border-radius: 999px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card-hover,
+    .detail-list {
+      transition: none;
+    }
   }
 
   .detail-section {

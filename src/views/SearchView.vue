@@ -395,6 +395,10 @@ useHead(
 }
 
 @media (max-width: 720px) {
+  .page-main {
+    background: rgba(250, 243, 246, 0.92);
+  }
+
   .page-shell {
     padding: 12px;
   }
@@ -402,6 +406,7 @@ useHead(
   .status-banner {
     border-inline-start-width: 4px;
     box-shadow: none;
+    background: rgba(var(--status-banner-rgb), 0.08) !important;
   }
 
   .drawer-actions {

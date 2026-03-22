@@ -411,7 +411,7 @@ onBeforeUnmount(() => {
     justify-self: end;
     gap: 6px;
     padding: 6px 6px 6px 10px;
-    box-shadow: 0 4px 12px rgba(92, 52, 68, 0.06);
+    box-shadow: none;
   }
 
   .view-switcher-label {
@@ -447,6 +447,12 @@ onBeforeUnmount(() => {
   .skeleton-pill {
     transition: none;
     animation: none;
+  }
+
+  .card-skeleton,
+  .list-skeleton,
+  .view-switcher {
+    box-shadow: none;
   }
 }
 
