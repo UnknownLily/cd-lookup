@@ -360,6 +360,11 @@ useHead(
     gap: 16px;
   }
 
+  .status-banner {
+    backdrop-filter: none;
+    box-shadow: 0 6px 14px rgba(var(--status-banner-rgb), 0.05);
+  }
+
   .drawer-inner {
     gap: 12px;
     padding: 12px 12px 14px;
@@ -396,6 +401,7 @@ useHead(
 
   .status-banner {
     border-inline-start-width: 4px;
+    box-shadow: none;
   }
 
   .drawer-actions {

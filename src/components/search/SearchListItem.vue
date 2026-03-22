@@ -573,6 +573,14 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
 @media (max-width: 720px) {
   .list-item {
     grid-template-columns: 1fr;
+    transition: border-color 160ms ease, box-shadow 160ms ease;
+    box-shadow: 0 10px 20px rgba(56, 44, 34, 0.04);
+  }
+
+  .list-item:hover,
+  .list-item:focus-within {
+    transform: none;
+    box-shadow: 0 10px 20px rgba(56, 44, 34, 0.05);
   }
 
   .list-cover {
@@ -605,6 +613,37 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
   .list-body-art {
     inset: 44% -8% -10% -8%;
     opacity: 0.18;
+    filter: none;
+    transform: none;
+    transition: opacity 160ms ease;
+  }
+
+  .list-cover-art {
+    filter: none;
+    transform: none;
+    opacity: 0.22;
+    transition: opacity 160ms ease;
+  }
+
+  .list-item:hover .list-cover-art,
+  .list-item:focus-within .list-cover-art,
+  .list-item.tone-dark .list-cover-art,
+  .list-item.tone-dark:hover .list-cover-art,
+  .list-item.tone-dark:focus-within .list-cover-art {
+    filter: none;
+    transform: none;
+    opacity: 0.26;
+  }
+
+  .list-item:hover .list-body-art,
+  .list-item:focus-within .list-body-art,
+  .list-item.tone-dark:hover .list-body-art,
+  .list-item.tone-dark:focus-within .list-body-art {
+    inset: 44% -8% -10% -8%;
+    background-position: 56% center;
+    filter: none;
+    transform: none;
+    opacity: 0.2;
   }
 
   .list-meta,

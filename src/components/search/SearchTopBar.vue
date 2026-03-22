@@ -855,6 +855,7 @@ const emit = defineEmits<{
   .top-bar {
     padding: 16px;
     gap: 14px;
+    box-shadow: 0 10px 20px rgba(56, 44, 34, 0.05);
   }
 
   .top-search {
@@ -935,6 +936,16 @@ const emit = defineEmits<{
 
   .apply-action-btn {
     min-height: 52px;
+    box-shadow: 0 6px 14px rgba(92, 52, 68, 0.14);
+  }
+
+  .eyebrow,
+  .pending-pill {
+    box-shadow: none;
+  }
+
+  .keyword-menu {
+    box-shadow: 0 8px 18px rgba(56, 44, 34, 0.06);
   }
 }
 

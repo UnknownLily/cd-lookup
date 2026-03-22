@@ -701,6 +701,8 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
     --card-action-hover-bg: rgb(255, 223, 233);
     --card-action-hover-border: rgba(var(--v-theme-primary), 0.28);
     transform: none;
+    transition: border-color 160ms ease, box-shadow 160ms ease;
+    box-shadow: 0 12px 24px rgba(56, 44, 34, 0.05);
   }
 
   .result-card.tone-dark,
@@ -726,6 +728,7 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
   .result-card:hover,
   .result-card:focus-within {
     transform: none;
+    box-shadow: 0 12px 24px rgba(56, 44, 34, 0.06);
   }
 
   .cover-image,
@@ -757,8 +760,9 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
     overflow: hidden;
     transform: translateY(calc(100% - var(--mobile-card-peek-height)));
     gap: 10px;
-    background: rgba(255, 248, 251, 0.86);
+    background: rgba(255, 248, 251, 0.96);
     border-top: 1px solid rgba(var(--v-theme-primary), 0.12);
+    transition: transform 180ms ease;
   }
 
   .card-summary {
@@ -797,6 +801,8 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
   .result-link-btn {
     width: 100%;
     min-width: 0;
+    box-shadow: none;
+    transition: background-color 160ms ease, border-color 160ms ease;
   }
 
   .result-action-btn {
@@ -825,9 +831,9 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
     max-height: 0;
     opacity: 0;
     overflow: hidden;
-    transform: translateY(6px);
+    transform: none;
     padding-top: 0;
-    transition: max-height 220ms ease, opacity 180ms ease, transform 220ms ease, margin-top 220ms ease;
+    transition: max-height 180ms ease, opacity 160ms ease, margin-top 180ms ease;
   }
 
   .result-card--mobile-expanded .card-hover {
@@ -849,10 +855,18 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
     overflow-x: hidden;
     overscroll-behavior: auto;
     -webkit-overflow-scrolling: touch;
-    transform: translateY(0);
+    transform: none;
     margin-top: 2px;
     padding-inline-end: 2px;
     scrollbar-width: thin;
+  }
+
+  .result-action-btn:hover,
+  .result-action-btn:focus-visible,
+  .result-link-btn:hover,
+  .result-link-btn:focus-visible {
+    transform: none;
+    box-shadow: none;
   }
 
   .detail-list--mobile-open::-webkit-scrollbar {

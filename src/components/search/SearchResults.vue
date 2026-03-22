@@ -411,7 +411,7 @@ onBeforeUnmount(() => {
     justify-self: end;
     gap: 6px;
     padding: 6px 6px 6px 10px;
-    box-shadow: 0 8px 18px rgba(92, 52, 68, 0.08);
+    box-shadow: 0 4px 12px rgba(92, 52, 68, 0.06);
   }
 
   .view-switcher-label {
@@ -438,6 +438,15 @@ onBeforeUnmount(() => {
   .results-empty {
     min-height: 260px;
     padding: 24px 18px;
+  }
+
+  .view-toggle :deep(.v-btn),
+  .skeleton-cover,
+  .list-skeleton-cover,
+  .skeleton-line,
+  .skeleton-pill {
+    transition: none;
+    animation: none;
   }
 }
 
