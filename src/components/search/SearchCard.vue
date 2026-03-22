@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import TagActionMenu from './TagActionMenu.vue'
 import { getFieldLabel, type SearchResultItem, type SearchTag } from '../../types/search'
@@ -14,6 +14,49 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+
+const cardRef = ref<HTMLElement | null>(null)
+const mobileExpanded = ref(false)
+const hasExpandableDetails = computed(() => props.item.detailSections.some((section) => section.tags.length > 0))
+
+function toggleMobileExpanded(): void {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  if (!window.matchMedia('(max-width: 720px)').matches || !hasExpandableDetails.value) {
+    return
+  }
+
+  mobileExpanded.value = !mobileExpanded.value
+}
+
+function handlePointerDown(event: PointerEvent): void {
+  if (!mobileExpanded.value || !cardRef.value) {
+    return
+  }
+
+  const target = event.target
+  if (!(target instanceof Node)) {
+    return
+  }
+
+  if (!cardRef.value.contains(target)) {
+    mobileExpanded.value = false
+  }
+}
+
+function handleWindowScroll(): void {
+  if (mobileExpanded.value) {
+    mobileExpanded.value = false
+  }
+}
+
+function handleCollapseRequest(): void {
+  if (mobileExpanded.value) {
+    mobileExpanded.value = false
+  }
+}
 
 function splitMetaLine(line: string): { label: string; value: string } {
   const firstSpaceIndex = line.indexOf(' ')
@@ -46,6 +89,25 @@ watch(
   },
   { immediate: true },
 )
+
+watch(
+  () => props.item.id,
+  () => {
+    mobileExpanded.value = false
+  },
+)
+
+onMounted(() => {
+  document.addEventListener('pointerdown', handlePointerDown)
+  window.addEventListener('scroll', handleWindowScroll, { passive: true })
+  window.addEventListener('search-card-collapse', handleCollapseRequest)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('pointerdown', handlePointerDown)
+  window.removeEventListener('scroll', handleWindowScroll)
+  window.removeEventListener('search-card-collapse', handleCollapseRequest)
+})
 
 async function detectCoverTone(coverUrl: string, currentToken: number): Promise<void> {
   try {
@@ -124,7 +186,7 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
 </script>
 
 <template>
-  <v-card class="result-card" :class="{ 'tone-dark': isDarkCover }" variant="flat">
+  <v-card ref="cardRef" class="result-card" :class="{ 'tone-dark': isDarkCover, 'result-card--mobile-expanded': mobileExpanded }" variant="flat">
     <div
       v-if="item.coverUrl"
       class="card-image-blur"
@@ -145,7 +207,7 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
     <div class="card-body" aria-hidden="true"></div>
 
     <div class="card-hover">
-      <div class="card-summary">
+      <div class="card-summary" :class="{ 'card-summary--tappable': hasExpandableDetails }" tabindex="0" @click="toggleMobileExpanded" @keyup.enter="toggleMobileExpanded" @keyup.space.prevent="toggleMobileExpanded">
         <div class="card-heading">
           <h3>{{ item.title }}</h3>
           <p>{{ item.subtitle }}</p>
@@ -170,6 +232,7 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
             :href="item.wikiUrl"
             target="_blank"
             rel="noopener noreferrer"
+            @click.stop
           >
             {{ t('app.wikiAction') }}
           </v-btn>
@@ -184,13 +247,14 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
             :href="link.url"
             target="_blank"
             rel="noopener noreferrer"
+            @click.stop
           >
             {{ link.label }}
           </v-btn>
         </div>
       </div>
 
-      <div class="detail-list">
+      <div class="detail-list" :class="{ 'detail-list--mobile-open': mobileExpanded }">
         <div v-for="section in item.detailSections.slice(0, 6)" :key="section.key" class="detail-section">
           <div class="detail-label">{{ getFieldLabel(section.key) }}</div>
           <div class="tag-row">
@@ -199,6 +263,7 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
               :key="`${item.id}-${tag.field}-${tag.value}`"
               :tag="tag"
               compact
+              @click.stop
               @add="emit('addTag', $event)"
               @set="emit('setTag', $event)"
             />
@@ -561,6 +626,10 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
   min-height: 0;
 }
 
+.card-summary--tappable {
+  cursor: pointer;
+}
+
 .detail-list {
   position: relative;
   z-index: 1;
@@ -616,15 +685,236 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
 }
 
 @media (max-width: 720px) {
+  .result-card {
+    --mobile-card-peek-height: 172px;
+    --mobile-card-expanded-max-height: 100%;
+    --card-link-color: rgba(31, 45, 51, 0.82);
+    --card-link-opacity: 0.78;
+    --card-title-color: rgba(31, 45, 51, 0.94);
+    --card-body-color: var(--text-soft);
+    --card-muted-color: var(--text-muted);
+    --card-summary-text-shadow: none;
+    --card-action-fg: rgb(var(--v-theme-primary));
+    --card-action-bg: rgb(255, 233, 240);
+    --card-action-border: rgba(var(--v-theme-primary), 0.18);
+    --card-action-hover-fg: rgb(var(--v-theme-primary));
+    --card-action-hover-bg: rgb(255, 223, 233);
+    --card-action-hover-border: rgba(var(--v-theme-primary), 0.28);
+    transform: none;
+  }
+
+  .result-card.tone-dark,
+  .result-card.tone-dark:hover,
+  .result-card.tone-dark:focus-within,
+  .result-card--mobile-expanded.tone-dark,
+  .result-card--mobile-expanded.tone-dark:hover,
+  .result-card--mobile-expanded.tone-dark:focus-within {
+    --card-link-color: rgba(31, 45, 51, 0.82);
+    --card-link-opacity: 0.78;
+    --card-title-color: rgba(31, 45, 51, 0.94);
+    --card-body-color: var(--text-soft);
+    --card-muted-color: var(--text-muted);
+    --card-summary-text-shadow: none;
+    --card-action-fg: rgb(var(--v-theme-primary));
+    --card-action-bg: rgb(255, 233, 240);
+    --card-action-border: rgba(var(--v-theme-primary), 0.18);
+    --card-action-hover-fg: rgb(var(--v-theme-primary));
+    --card-action-hover-bg: rgb(255, 223, 233);
+    --card-action-hover-border: rgba(var(--v-theme-primary), 0.28);
+  }
+
+  .result-card:hover,
+  .result-card:focus-within {
+    transform: none;
+  }
+
+  .cover-image,
+  .cover-fallback {
+    height: 216px !important;
+  }
+
+  .card-cover::after,
+  .card-hover::before,
+  .card-hover::after {
+    display: none;
+  }
+
+  .card-image-blur,
+  .card-image-wash {
+    opacity: 0;
+  }
+
+  .card-body {
+    min-height: var(--mobile-card-peek-height);
+  }
+
+  .card-hover {
+    min-height: var(--mobile-card-peek-height);
+    max-height: var(--mobile-card-expanded-max-height);
+    padding: 12px 12px 14px;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    overflow: hidden;
+    transform: translateY(calc(100% - var(--mobile-card-peek-height)));
+    gap: 10px;
+    background: rgba(255, 248, 251, 0.86);
+    border-top: 1px solid rgba(var(--v-theme-primary), 0.12);
+  }
+
   .card-summary {
-    gap: 8px;
+    grid-template-rows: auto;
+    min-height: 0;
+    gap: 6px;
+  }
+
+  .card-summary--tappable {
+    outline: none;
+  }
+
+  .card-heading h3 {
+    font-size: 1.08rem;
+  }
+
+  .card-heading p {
+    margin-top: 4px;
+    font-size: 0.95rem;
+  }
+
+  .card-meta,
+  .album-name-row {
+    gap: 4px 8px;
+    margin-top: 6px;
+    font-size: 0.84rem;
+  }
+
+  .card-actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .result-action-btn,
+  .result-link-btn {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .result-action-btn {
+    min-height: 38px;
+    padding-inline: 10px;
+  }
+
+  .result-action-btn :deep(.v-btn__content),
+  .result-link-btn :deep(.v-btn__content) {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.86rem;
+    gap: 4px;
+  }
+
+  .result-link-btn {
+    padding-inline: 8px;
+  }
+
+  .detail-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 10px;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transform: translateY(6px);
+    padding-top: 0;
+    transition: max-height 220ms ease, opacity 180ms ease, transform 220ms ease, margin-top 220ms ease;
+  }
+
+  .result-card--mobile-expanded .card-hover {
+    transform: translateY(0);
+  }
+
+  .result-card--mobile-expanded .card-hover::before,
+  .result-card--mobile-expanded .card-hover::after,
+  .result-card--mobile-expanded .card-cover::after,
+  .result-card--mobile-expanded .card-image-blur,
+  .result-card--mobile-expanded .card-image-wash {
+    opacity: 0;
+  }
+
+  .detail-list--mobile-open {
+    max-height: none;
+    opacity: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: auto;
+    -webkit-overflow-scrolling: touch;
+    transform: translateY(0);
+    margin-top: 2px;
+    padding-inline-end: 2px;
+    scrollbar-width: thin;
+  }
+
+  .detail-list--mobile-open::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .detail-list--mobile-open::-webkit-scrollbar-thumb {
+    background: rgba(var(--v-theme-primary), 0.2);
+    border-radius: 999px;
+  }
+
+  .detail-section {
+    grid-template-columns: 58px minmax(0, 1fr);
+    gap: 6px;
+    align-items: start;
+  }
+
+  .detail-label {
+    font-size: 0.78rem;
+    line-height: 1.45;
+    letter-spacing: 0.01em;
+  }
+
+  .tag-row {
+    gap: 4px;
   }
 }
 
-@media (max-width: 720px) {
-  .detail-section {
+@media (max-width: 420px) {
+  .cover-image,
+  .cover-fallback {
+    height: 180px !important;
+  }
+
+  .result-card {
+    --mobile-card-expanded-max-height: 100%;
+  }
+
+  .card-hover {
+    padding: 10px 10px 12px;
+  }
+
+  .card-actions {
+    gap: 5px;
+  }
+
+  .result-action-btn {
+    padding-inline: 8px;
+  }
+
+  .result-action-btn :deep(.v-btn__content),
+  .result-link-btn :deep(.v-btn__content) {
+    font-size: 0.8rem;
+  }
+
+  .detail-list {
     grid-template-columns: 1fr;
     gap: 6px;
+  }
+
+  .detail-section {
+    grid-template-columns: 54px minmax(0, 1fr);
   }
 }
 </style>

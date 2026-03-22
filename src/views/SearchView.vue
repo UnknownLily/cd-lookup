@@ -186,11 +186,13 @@ useHead(
 
       <v-navigation-drawer v-model="mobileFiltersOpen" temporary location="left" width="360" class="mobile-only mobile-filters-drawer">
         <div class="drawer-inner">
-          <SearchFiltersPanel
-            :draft-criteria="store.draftCriteria"
-            @update-range="handleRangeUpdate"
-            @update-list="handleListUpdate"
-          />
+          <div class="drawer-content">
+            <SearchFiltersPanel
+              :draft-criteria="store.draftCriteria"
+              @update-range="handleRangeUpdate"
+              @update-list="handleListUpdate"
+            />
+          </div>
           <div class="drawer-actions">
             <v-btn class="drawer-action-btn" variant="text" @click="mobileFiltersOpen = false">{{ t('actions.close') }}</v-btn>
             <v-btn class="drawer-action-btn" color="primary" :loading="store.status === 'loading'" @click="applyFilters">{{ t('actions.applyFilters') }}</v-btn>
@@ -306,16 +308,27 @@ useHead(
 
 .drawer-inner {
   display: grid;
-  grid-template-rows: 1fr auto;
+  grid-template-rows: minmax(0, 1fr) auto;
   height: 100%;
   gap: 16px;
-  padding: 18px 14px 22px;
+  padding: 18px 14px 18px;
+}
+
+.drawer-content {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-inline-end: 4px;
 }
 
 .drawer-actions {
   display: flex;
   justify-content: space-between;
   gap: 12px;
+  position: sticky;
+  bottom: 0;
+  padding-top: 12px;
+  background: linear-gradient(180deg, rgba(255, 248, 251, 0), rgba(255, 248, 251, 0.9) 24%, rgba(255, 248, 251, 0.98));
 }
 
 .drawer-action-btn {
@@ -332,22 +345,29 @@ useHead(
   border-bottom-right-radius: 28px;
 }
 
+.mobile-filters-drawer {
+  width: min(360px, calc(100vw - 12px)) !important;
+  max-width: calc(100vw - 12px) !important;
+}
+
 .mobile-only {
   display: none;
 }
 
 @media (max-width: 960px) {
   .page-shell {
-    padding: 18px;
+    padding: 16px;
+    gap: 16px;
   }
 
   .drawer-inner {
     gap: 12px;
-    padding: 12px 12px 16px;
+    padding: 12px 12px 14px;
   }
 
   .page-layout {
     grid-template-columns: 1fr;
+    gap: 18px;
   }
 
   .desktop-only {
@@ -366,6 +386,25 @@ useHead(
 
   .mobile-only {
     display: block;
+  }
+}
+
+@media (max-width: 720px) {
+  .page-shell {
+    padding: 12px;
+  }
+
+  .status-banner {
+    border-inline-start-width: 4px;
+  }
+
+  .drawer-actions {
+    flex-direction: column-reverse;
+  }
+
+  .drawer-action-btn {
+    width: 100%;
+    min-height: 48px;
   }
 }
 </style>

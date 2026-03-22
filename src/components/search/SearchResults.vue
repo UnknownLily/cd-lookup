@@ -27,6 +27,11 @@ const emit = defineEmits<{
 const sentinel = ref<HTMLDivElement | null>(null)
 let observer: IntersectionObserver | null = null
 
+function handleViewModeUpdate(mode: ViewMode): void {
+  window.dispatchEvent(new Event('search-card-collapse'))
+  emit('updateViewMode', mode)
+}
+
 function setupObserver(): void {
   observer?.disconnect()
   if (!sentinel.value) {
@@ -74,7 +79,7 @@ onBeforeUnmount(() => {
             mandatory
             divided
             :model-value="viewMode"
-            @update:model-value="emit('updateViewMode', $event)"
+            @update:model-value="handleViewModeUpdate($event)"
           >
             <v-btn value="card" icon="$viewCard" :aria-label="t('results.viewCard')" />
             <v-btn value="list" icon="$viewList" :aria-label="t('results.viewList')" />
@@ -390,15 +395,31 @@ onBeforeUnmount(() => {
   .results-head {
     flex-direction: column;
     align-items: start;
+    gap: 12px;
   }
 
   .results-toolbar {
     width: 100%;
     justify-content: space-between;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 10px;
   }
 
   .view-switcher {
-    padding-left: 12px;
+    justify-self: end;
+    gap: 6px;
+    padding: 6px 6px 6px 10px;
+    box-shadow: 0 8px 18px rgba(92, 52, 68, 0.08);
+  }
+
+  .view-switcher-label {
+    font-size: 0.82rem;
+  }
+
+  .view-toggle :deep(.v-btn) {
+    min-width: 40px;
   }
 
   .list-skeleton {
@@ -407,6 +428,55 @@ onBeforeUnmount(() => {
 
   .list-skeleton-cover {
     min-height: 180px;
+  }
+
+  .results-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .results-empty {
+    min-height: 260px;
+    padding: 24px 18px;
+  }
+}
+
+@media (max-width: 560px) {
+  .results-head h2 {
+    font-size: 1.32rem;
+  }
+
+  .results-head p,
+  .results-count {
+    font-size: 0.9rem;
+  }
+
+  .results-head p {
+    display: none;
+  }
+
+  .results-toolbar {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .view-switcher {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .view-switcher-label {
+    letter-spacing: 0.02em;
+  }
+}
+
+@media (max-width: 420px) {
+  .view-switcher-label {
+    display: none;
+  }
+
+  .view-switcher {
+    padding-inline: 6px;
   }
 }
 

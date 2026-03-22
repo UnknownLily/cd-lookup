@@ -103,7 +103,11 @@ function setAsFilter(): void {
 }
 
 .tag-chip--compact {
-  --v-chip-height: 28px;
-  font-size: 0.84rem;
+  --v-chip-height: 24px;
+  font-size: 0.78rem;
+}
+
+.tag-chip--compact :deep(.v-chip__content) {
+  padding-inline: 2px;
 }
 </style>

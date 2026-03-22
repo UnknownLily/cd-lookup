@@ -171,72 +171,74 @@ const emit = defineEmits<{
           <p>{{ t('app.introBeforeLink') }}<a href="https://thwiki.cc/%E5%90%8C%E4%BA%BA%E9%9F%B3%E4%B9%90%E4%B8%93%E8%BE%91%E6%9F%A5%E8%AF%A2" target="_blank" rel="noopener noreferrer">{{ t('app.introLinkText') }}</a>{{ t('app.introAfterLink') }}</p>
         </div>
 
-        <v-menu
-          v-model="suggestionMenuOpen"
-          :close-on-content-click="false"
-          :open-on-click="false"
-          :open-on-focus="false"
-          location="bottom"
-          offset="10"
-        >
-          <template #activator="{ props: menuProps }">
-            <v-text-field
-              v-bind="menuProps"
-              class="keyword-input"
-              rounded="xl"
-              :model-value="keyword"
-              :hint="suggestionHint"
-              persistent-hint
-              :label="t('topBar.quickTagLabel')"
-              :placeholder="t('topBar.quickTagPlaceholder')"
-              prepend-inner-icon="$search"
-              clearable
-              @update:model-value="handleKeywordInput"
-              @focus="handleKeywordFocus"
-              @click:clear="emit('updateKeyword', '')"
-              @keyup.enter="handleKeywordEnter"
-            >
-              <template #append-inner>
-                <div class="keyword-actions">
-                  <v-progress-circular
-                    v-if="suggestionLoading"
-                    size="18"
-                    width="2"
-                    indeterminate
-                    color="primary"
-                  />
-                  <v-btn
-                    variant="text"
-                    density="comfortable"
-                    icon="$expand"
-                    class="keyword-toggle"
-                    @click.stop="suggestionMenuOpen = !suggestionMenuOpen"
-                  />
+        <div class="keyword-input-block">
+          <v-menu
+            v-model="suggestionMenuOpen"
+            :close-on-content-click="false"
+            :open-on-click="false"
+            :open-on-focus="false"
+            location="bottom"
+            offset="10"
+          >
+            <template #activator="{ props: menuProps }">
+              <v-text-field
+                v-bind="menuProps"
+                class="keyword-input"
+                rounded="xl"
+                :model-value="keyword"
+                :hint="suggestionHint"
+                persistent-hint
+                :label="t('topBar.quickTagLabel')"
+                :placeholder="t('topBar.quickTagPlaceholder')"
+                prepend-inner-icon="$search"
+                clearable
+                @update:model-value="handleKeywordInput"
+                @focus="handleKeywordFocus"
+                @click:clear="emit('updateKeyword', '')"
+                @keyup.enter="handleKeywordEnter"
+              >
+                <template #append-inner>
+                  <div class="keyword-actions">
+                    <v-progress-circular
+                      v-if="suggestionLoading"
+                      size="18"
+                      width="2"
+                      indeterminate
+                      color="primary"
+                    />
+                    <v-btn
+                      variant="text"
+                      density="comfortable"
+                      icon="$expand"
+                      class="keyword-toggle"
+                      @click.stop="suggestionMenuOpen = !suggestionMenuOpen"
+                    />
+                  </div>
+                </template>
+              </v-text-field>
+            </template>
+
+            <v-card class="keyword-menu" rounded="xl" variant="flat">
+              <div class="keyword-tip">
+                <div class="keyword-tip-head">
+                  <div class="keyword-tip-title">{{ t('topBar.suggestionPanelTitle') }}</div>
+                  <span class="keyword-tip-badge">{{ t('topBar.suggestionPanelBadge') }}</span>
                 </div>
-              </template>
-            </v-text-field>
-          </template>
-
-          <v-card class="keyword-menu" rounded="xl" variant="flat">
-            <div class="keyword-tip">
-              <div class="keyword-tip-head">
-                <div class="keyword-tip-title">{{ t('topBar.suggestionPanelTitle') }}</div>
-                <span class="keyword-tip-badge">{{ t('topBar.suggestionPanelBadge') }}</span>
+                <div class="keyword-tip-text">{{ t('topBar.suggestionPanelText') }}</div>
               </div>
-              <div class="keyword-tip-text">{{ t('topBar.suggestionPanelText') }}</div>
-            </div>
 
-            <v-list class="keyword-list" density="comfortable">
-              <v-list-item
-                v-for="item in suggestionItems"
-                :key="`${item.key}-${item.value}`"
-                :title="item.value"
-                :subtitle="item.fieldLabel"
-                @click="handleSuggestionPick(item)"
-              />
-            </v-list>
-          </v-card>
-        </v-menu>
+              <v-list class="keyword-list" density="comfortable">
+                <v-list-item
+                  v-for="item in suggestionItems"
+                  :key="`${item.key}-${item.value}`"
+                  :title="item.value"
+                  :subtitle="item.fieldLabel"
+                  @click="handleSuggestionPick(item)"
+                />
+              </v-list>
+            </v-card>
+          </v-menu>
+        </div>
 
         <div v-if="selectedSuggestionItems.length > 0" class="quick-tags-row">
           <v-chip
@@ -252,7 +254,7 @@ const emit = defineEmits<{
         </div>
       </div>
 
-      <div class="top-actions">
+        <div class="top-actions">
         <v-menu
           v-model="localeMenuOpen"
           location="bottom end"
@@ -303,7 +305,7 @@ const emit = defineEmits<{
         </v-btn>
 
         <div class="status-pill-slot top-status-pill-slot">
-          <span class="pending-pill" :class="{ 'pending-pill-hidden': !statusBadgeText }">{{ statusBadgeText || t('status.placeholderStatus') }}</span>
+          <span v-if="statusBadgeText" class="pending-pill">{{ statusBadgeText }}</span>
         </div>
       </div>
     </div>
@@ -355,6 +357,10 @@ const emit = defineEmits<{
   flex: 1;
 }
 
+.keyword-input-block {
+  min-width: 0;
+}
+
 .keyword-input :deep(.v-field) {
   border-radius: var(--search-input-radius);
 }
@@ -378,11 +384,24 @@ const emit = defineEmits<{
   padding-top: 0;
 }
 
+.keyword-input :deep(.v-input__details) {
+  padding-inline: 4px;
+}
+
+.keyword-input :deep(.v-messages) {
+  min-height: 18px;
+}
+
+.keyword-input :deep(.v-messages__message) {
+  line-height: 1.4;
+}
+
 .quick-tags-row {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   align-items: center;
+  align-content: start;
 }
 
 .locale-select {
@@ -707,13 +726,6 @@ const emit = defineEmits<{
   font-size: 0.92rem;
 }
 
-.status-pill-slot {
-  display: flex;
-  justify-content: flex-end;
-  min-width: 12.5rem;
-  min-height: 2rem;
-}
-
 .pending-pill {
   display: inline-flex;
   align-items: center;
@@ -725,10 +737,6 @@ const emit = defineEmits<{
   box-shadow: var(--top-primary-pill-shadow);
   font-size: 0.88rem;
   white-space: nowrap;
-}
-
-.pending-pill-hidden {
-  visibility: hidden;
 }
 
 .mobile-filters {
@@ -757,18 +765,16 @@ const emit = defineEmits<{
     padding: 20px;
   }
 
-  .top-main,
-  .top-meta {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
   .top-main {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 18px;
   }
 
   .top-meta {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
   }
 
   .top-actions,
@@ -778,23 +784,27 @@ const emit = defineEmits<{
 
   .top-actions {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    align-items: end;
-    column-gap: 14px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+    column-gap: 12px;
     row-gap: 10px;
     min-height: 0;
+    width: 100%;
   }
 
   .mobile-filters {
     display: inline-flex;
     order: 1;
-    align-self: end;
+    align-self: stretch;
     min-height: 54px;
+    width: 100%;
   }
 
   .locale-select {
     order: 2;
     min-width: 0;
+    width: 100%;
+    min-height: 54px;
   }
 
   .top-status-pill-slot {
@@ -803,16 +813,147 @@ const emit = defineEmits<{
     width: 100%;
   }
 
+  .top-status-pill-slot:empty {
+    display: none;
+  }
+
+  .intro-copy p {
+    max-width: none;
+  }
+
+  .quick-tags-row {
+    gap: 10px;
+  }
+
+  .quick-tag-chip {
+    max-width: min(100%, 320px);
+  }
+
   .status-panel {
     flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
   }
 
   .status-actions {
     flex-wrap: wrap;
+    gap: 10px;
   }
 
-  .status-pill-slot {
-    min-width: 0;
+  .apply-action-btn {
+    flex: 1 1 220px;
+    min-height: 50px;
+  }
+
+  .summary-chips {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 720px) {
+  .top-bar {
+    padding: 16px;
+    gap: 14px;
+  }
+
+  .top-search {
+    gap: 14px;
+  }
+
+  .intro-copy h1 {
+    font-size: clamp(1.8rem, 8vw, 2.35rem);
+    line-height: 1.12;
+  }
+
+  .intro-copy p {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+    font-size: 0.98rem;
+  }
+
+  .keyword-input :deep(.v-field__input) {
+    min-height: 54px;
+  }
+
+  .keyword-input :deep(.v-input__details) {
+    min-height: 16px;
+    padding-top: 2px;
+  }
+
+  .keyword-input :deep(.v-messages__message) {
+    font-size: 0.78rem;
+  }
+
+  .top-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .mobile-filters,
+  .locale-select {
+    order: initial;
+  }
+
+  .top-status-pill-slot {
+    grid-column: auto;
+  }
+
+  .pending-pill {
+    width: 100%;
+    justify-content: center;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .summary-chips {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    margin-inline: -2px;
+    padding-inline: 2px;
+    scrollbar-width: none;
+  }
+
+  .summary-chips::-webkit-scrollbar {
+    display: none;
+  }
+
+  .summary-chips :deep(.v-chip) {
+    flex: 0 0 auto;
+  }
+
+  .status-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .top-action-btn {
+    width: 100%;
+  }
+
+  .apply-action-btn {
+    min-height: 52px;
+  }
+}
+
+@media (max-width: 420px) {
+  .top-bar {
+    padding: 14px;
+  }
+
+  .eyebrow {
+    padding: 4px 10px;
+    font-size: 0.76rem;
+  }
+
+  .intro-copy p {
+    font-size: 0.94rem;
+  }
+
+  .keyword-tip-text {
+    font-size: 0.78rem;
   }
 }
 </style>
