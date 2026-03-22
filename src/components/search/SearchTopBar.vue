@@ -870,6 +870,7 @@ const emit = defineEmits<{
   .intro-copy p {
     display: -webkit-box;
     -webkit-box-orient: vertical;
+    line-clamp: 3;
     -webkit-line-clamp: 3;
     overflow: hidden;
     font-size: 0.98rem;
@@ -889,16 +890,49 @@ const emit = defineEmits<{
   }
 
   .top-actions {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1.45fr) minmax(0, 0.95fr);
+    column-gap: 8px;
+    row-gap: 6px;
   }
 
   .mobile-filters,
   .locale-select {
     order: initial;
+    min-height: 48px;
+  }
+
+  .mobile-filters {
+    grid-column: 1;
+    grid-row: 1;
+    padding-inline: 12px;
+  }
+
+  .locale-select {
+    grid-column: 2;
+    grid-row: 1;
+    padding-inline: 12px;
+  }
+
+  .locale-select :deep(.v-btn__content) {
+    gap: 6px;
+    font-size: 0.9rem;
+  }
+
+  .mobile-filters :deep(.v-btn__content) {
+    gap: 6px;
+    font-size: 0.96rem;
+  }
+
+  .locale-select-value {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .top-status-pill-slot {
-    grid-column: auto;
+    grid-column: 1 / -1;
+    grid-row: 2;
   }
 
   .pending-pill {
@@ -927,7 +961,8 @@ const emit = defineEmits<{
 
   .status-actions {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1.45fr) minmax(0, 0.95fr);
+    gap: 8px;
   }
 
   .top-action-btn {
@@ -935,8 +970,12 @@ const emit = defineEmits<{
   }
 
   .apply-action-btn {
-    min-height: 52px;
+    min-height: 50px;
     box-shadow: none;
+  }
+
+  .status-actions .top-action-btn:not(.apply-action-btn) {
+    min-height: 50px;
   }
 
   .eyebrow,
@@ -952,6 +991,35 @@ const emit = defineEmits<{
 @media (max-width: 420px) {
   .top-bar {
     padding: 14px;
+  }
+
+  .top-actions {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.9fr);
+    column-gap: 8px;
+  }
+
+  .status-actions {
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.9fr);
+    gap: 6px;
+  }
+
+  .mobile-filters,
+  .locale-select {
+    min-height: 46px;
+  }
+
+  .mobile-filters {
+    padding-inline: 10px;
+  }
+
+  .locale-select {
+    padding-inline: 10px;
+  }
+
+  .mobile-filters :deep(.v-btn__content),
+  .locale-select :deep(.v-btn__content) {
+    gap: 5px;
+    font-size: 0.88rem;
   }
 
   .eyebrow {

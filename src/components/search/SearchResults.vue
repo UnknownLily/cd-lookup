@@ -487,11 +487,17 @@ onBeforeUnmount(() => {
 
 @media (max-width: 420px) {
   .view-switcher-label {
-    display: none;
+    display: inline;
+    font-size: 0.78rem;
   }
 
   .view-switcher {
-    padding-inline: 6px;
+    gap: 4px;
+    padding-inline: 8px;
+  }
+
+  .view-toggle :deep(.v-btn) {
+    min-width: 38px;
   }
 }
 

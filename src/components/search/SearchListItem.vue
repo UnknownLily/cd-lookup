@@ -165,7 +165,17 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
                 </span>
               </div>
             </div>
+          </div>
 
+          <div v-if="item.meta.length > 0" class="list-meta">
+            <span v-for="line in item.meta" :key="line">
+              <template v-for="part in [splitMetaLine(line)]" :key="part.label + part.value">
+                <strong>{{ part.label }}</strong><span v-if="part.value"> {{ part.value }}</span>
+              </template>
+            </span>
+          </div>
+
+          <div v-if="item.wikiUrl || item.links.length > 0" class="list-links">
             <v-btn
               class="result-action-btn"
               color="primary"
@@ -177,17 +187,7 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
             >
               {{ t('app.wikiAction') }}
             </v-btn>
-          </div>
 
-          <div v-if="item.meta.length > 0" class="list-meta">
-            <span v-for="line in item.meta" :key="line">
-              <template v-for="part in [splitMetaLine(line)]" :key="part.label + part.value">
-                <strong>{{ part.label }}</strong><span v-if="part.value"> {{ part.value }}</span>
-              </template>
-            </span>
-          </div>
-
-          <div v-if="item.links.length > 0" class="list-links">
             <v-btn
               class="result-link-btn"
               v-for="link in item.links.slice(0, 2)"
@@ -474,10 +474,8 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
 }
 
 .list-header {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  align-items: start;
+  display: grid;
+  gap: 0;
 }
 
 .list-header h3 {
@@ -488,12 +486,7 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
 }
 
 .list-header p {
-  margin: 6px 0 0;
-  color: var(--text-soft);
-}
-
-.list-meta {
-  display: flex;
+    gap: 0;
   flex-wrap: wrap;
   gap: 8px 14px;
   color: var(--text-muted);

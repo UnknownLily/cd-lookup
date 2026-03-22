@@ -151,6 +151,11 @@ function draftValues(key: ListFilterKey): string[] {
   gap: 14px;
 }
 
+:deep(.v-expansion-panels--variant-accordion > .v-expansion-panel::after) {
+  opacity: 0;
+  border-top: none;
+}
+
 :deep(.v-expansion-panel) {
   overflow: hidden;
   border: 1px solid var(--theme-border-soft);

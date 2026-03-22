@@ -283,6 +283,8 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
 
 <style scoped>
 .result-card {
+  --card-summary-min-height: 220px;
+  --card-heading-height: 174px;
   --card-title-color: rgba(31, 45, 51, 0.94);
   --card-body-color: var(--text-soft);
   --card-muted-color: var(--text-muted);
@@ -586,6 +588,7 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
   text-shadow: var(--card-summary-text-shadow);
   display: -webkit-box;
   -webkit-box-orient: vertical;
+  line-clamp: 2;
   -webkit-line-clamp: 2;
   overflow: hidden;
 }
@@ -630,11 +633,15 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
   display: grid;
   grid-template-rows: minmax(0, 1fr) auto;
   gap: 10px;
-  min-height: 172px;
+  min-height: var(--card-summary-min-height);
 }
 
 .card-heading {
-  min-height: 0;
+  height: var(--card-heading-height);
+  display: grid;
+  align-content: start;
+  grid-auto-rows: max-content;
+  overflow: hidden;
 }
 
 .card-summary--tappable {
@@ -704,6 +711,8 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
     --mobile-collapse-easing: cubic-bezier(0.4, 0, 0.2, 1);
     --mobile-expand-duration: 200ms;
     --mobile-expand-easing: cubic-bezier(0.2, 0.9, 0.3, 1);
+    --card-summary-min-height: 164px;
+    --card-heading-height: 112px;
     --card-link-color: rgba(31, 45, 51, 0.82);
     --card-link-opacity: 0.78;
     --card-title-color: rgba(31, 45, 51, 0.94);
@@ -801,7 +810,7 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
   .card-summary {
     grid-template-rows: auto;
     min-height: 0;
-    gap: 6px;
+    gap: 4px;
   }
 
   .card-summary--tappable {
@@ -820,7 +829,7 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
   .card-meta,
   .album-name-row {
     gap: 4px 8px;
-    margin-top: 6px;
+    margin-top: 4px;
     font-size: 0.84rem;
   }
 
