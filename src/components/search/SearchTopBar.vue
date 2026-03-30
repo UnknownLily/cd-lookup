@@ -303,14 +303,14 @@ const emit = defineEmits<{
         <v-btn class="mobile-filters top-action-btn" variant="outlined" prepend-icon="$filters" @click="emit('openFilters')">
           {{ t('actions.filter') }}
         </v-btn>
-
-        <div class="status-pill-slot top-status-pill-slot">
-          <span v-if="statusBadgeText" class="pending-pill">{{ statusBadgeText }}</span>
-        </div>
       </div>
     </div>
 
     <div class="top-meta">
+      <div v-if="statusBadgeText" class="status-pill-row">
+        <span class="pending-pill">{{ statusBadgeText }}</span>
+      </div>
+
       <div class="summary-chips">
         <v-chip v-for="item in summary.slice(0, 8)" :key="item" variant="tonal" color="secondary">
           {{ item }}
@@ -684,10 +684,6 @@ const emit = defineEmits<{
   min-height: 2.75rem;
 }
 
-.top-status-pill-slot {
-  min-width: 0;
-}
-
 .top-meta {
   margin-top: 18px;
   padding-top: 18px;
@@ -696,6 +692,10 @@ const emit = defineEmits<{
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 16px;
   align-items: start;
+}
+
+.status-pill-row {
+  grid-column: 1 / -1;
 }
 
 .summary-chips {
@@ -805,16 +805,6 @@ const emit = defineEmits<{
     min-width: 0;
     width: 100%;
     min-height: 54px;
-  }
-
-  .top-status-pill-slot {
-    order: 3;
-    grid-column: 1 / -1;
-    width: 100%;
-  }
-
-  .top-status-pill-slot:empty {
-    display: none;
   }
 
   .intro-copy p {
@@ -930,7 +920,7 @@ const emit = defineEmits<{
     white-space: nowrap;
   }
 
-  .top-status-pill-slot {
+  .status-pill-row {
     grid-column: 1 / -1;
     grid-row: 2;
   }

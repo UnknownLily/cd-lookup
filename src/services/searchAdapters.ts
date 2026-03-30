@@ -73,6 +73,23 @@ function getValues(item: RawItem, field: ItemField): string[] {
   return rawValues.map((value) => formatValue(typeId, value as never))
 }
 
+function getTagValues(item: RawItem, field: ItemField): string[] {
+  const rawValues = item[field]
+  if (!rawValues || rawValues.length === 0) {
+    return []
+  }
+
+  const typeId = ITEM_PROP_TYPE[field]
+  return rawValues.map((value) => {
+    if (typeId === '_wpg') {
+      const pageValue = value as DataValueMap['_wpg']
+      return pageValue.fulltext || pageValue.displaytitle
+    }
+
+    return formatValue(typeId, value as never)
+  })
+}
+
 function buildTags(field: ItemField, values: string[]): SearchTag[] {
   return values.map((value) => ({
     field,
@@ -86,12 +103,12 @@ function buildDetailSections(item: RawItem): SearchDetailSection[] {
   return DETAIL_FIELD_ORDER.map((field) => ({
     key: field,
     label: getFieldLabel(field),
-    tags: buildTags(field, getValues(item, field)),
+    tags: buildTags(field, getTagValues(item, field)),
   })).filter((section) => section.tags.length > 0)
 }
 
 function buildPrimaryTags(item: RawItem): SearchTag[] {
-  return PRIMARY_TAG_FIELDS.flatMap((field) => buildTags(field, getValues(item, field))).slice(0, 12)
+  return PRIMARY_TAG_FIELDS.flatMap((field) => buildTags(field, getTagValues(item, field))).slice(0, 12)
 }
 
 function buildLinks(item: RawItem): SearchResultLink[] {
@@ -121,10 +138,11 @@ export function adaptSearchResult(item: RawItem): SearchResultItem {
   const albumNames = getValues(item, 'alname').filter((value) => value !== title)
   const durationText = item.time?.[0] ? formatValue('_dur', item.time[0]) : null
   const coverUrl = item.cover?.[0]?.fullurl ?? null
+  const eventTags = getTagValues(item, 'event')
   const meta = [
     item.year?.[0] ? translate('searchResult.metaYear', { value: item.year[0] }) : null,
     durationText ? translate('searchResult.metaDuration', { value: durationText }) : null,
-    getValues(item, 'event')[0] ? translate('searchResult.metaEvent', { value: getValues(item, 'event')[0] }) : null,
+    eventTags[0] ? translate('searchResult.metaEvent', { value: eventTags[0] }) : null,
   ].filter((value): value is string => Boolean(value))
 
   return {

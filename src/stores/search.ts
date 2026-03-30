@@ -174,14 +174,24 @@ export const useSearchStore = defineStore('search', () => {
     viewMode.value = mode
   }
 
-  function addTagToDraft(field: string, value: string, replace = false): boolean {
+  function addTagToDraft(field: string, value: string): boolean {
     if (!isListFilterKey(field)) {
       return false
     }
 
-    draftCriteria.value[field] = replace
-      ? [value]
-      : normalizeTextList([...draftCriteria.value[field], value])
+    draftCriteria.value[field] = normalizeTextList([...draftCriteria.value[field], value])
+
+    return true
+  }
+
+  function setTagAsOnlyDraft(field: string, value: string): boolean {
+    if (!isListFilterKey(field)) {
+      return false
+    }
+
+    const nextCriteria = createDefaultCriteria()
+    nextCriteria[field] = [value]
+    draftCriteria.value = nextCriteria
 
     return true
   }
@@ -366,6 +376,7 @@ export const useSearchStore = defineStore('search', () => {
     updateListFilter,
     setViewMode,
     addTagToDraft,
+    setTagAsOnlyDraft,
     removeTagFromDraft,
     loadMore,
     applyDraft,

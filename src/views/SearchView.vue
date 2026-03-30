@@ -68,15 +68,15 @@ async function updateViewMode(mode: ViewMode): Promise<void> {
 }
 
 function handleTagAdd(tag: SearchTag): void {
-  store.addTagToDraft(tag.field, tag.value, false)
+  store.addTagToDraft(tag.field, tag.value)
 }
 
 function handleTagSet(tag: SearchTag): void {
-  store.addTagToDraft(tag.field, tag.value, true)
+  store.setTagAsOnlyDraft(tag.field, tag.value)
 }
 
 function handleQuickTagAdd(tag: SearchTag): void {
-  store.addTagToDraft(tag.field, tag.value, false)
+  store.addTagToDraft(tag.field, tag.value)
   store.updateKeyword('')
 }
 
