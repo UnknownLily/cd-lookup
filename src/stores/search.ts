@@ -1,7 +1,7 @@
 import { computed, ref, shallowRef } from 'vue'
 import { defineStore } from 'pinia'
 import type { LocationQuery } from 'vue-router'
-import { fetchSearchPage } from '../services/searchApi'
+import { fetchSearchCount, fetchSearchPage } from '../services/searchApi'
 import { adaptSearchResult } from '../services/searchAdapters'
 import {
   KeywordResolutionError,
@@ -220,7 +220,10 @@ export const useSearchStore = defineStore('search', () => {
       effectiveCriteria.value = cloneCriteria(resolution.criteria)
       noticeState.value = resolution.noticeMessage
 
-      const response = await fetchSearchPage(resolution.criteria, { limit: PAGE_SIZE, offset: 0, signal: controller.signal })
+      const [countResponse, response] = await Promise.all([
+        fetchSearchCount(resolution.criteria, { signal: controller.signal }),
+        fetchSearchPage(resolution.criteria, { limit: PAGE_SIZE, offset: 0, signal: controller.signal }),
+      ])
       if (activeRequestId.value !== requestId) {
         return
       }
@@ -231,7 +234,7 @@ export const useSearchStore = defineStore('search', () => {
       }
 
       rawResults.value = response.results
-      totalCount.value = response.count
+      totalCount.value = countResponse.count
       nextOffset.value = response.results.length
       more.value = response.more
       status.value = response.results.length > 0 ? 'success' : 'empty'
@@ -287,7 +290,6 @@ export const useSearchStore = defineStore('search', () => {
       }
 
       rawResults.value = [...rawResults.value, ...response.results]
-      totalCount.value = response.count
       nextOffset.value += response.results.length
       more.value = response.more
       status.value = results.value.length > 0 ? 'success' : 'empty'

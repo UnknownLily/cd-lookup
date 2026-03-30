@@ -4,6 +4,7 @@ import {
   isRangeAtDefault,
   hasActiveCriteria,
   type ApiCriteriaPayload,
+  type CountResponse,
   type ItemField,
   type QueryResponse,
   type RangeFilterKey,
@@ -106,6 +107,37 @@ export function toApiCriteria(criteria: SearchCriteriaDraft): ApiCriteriaPayload
   return payload
 }
 
+async function postSearchRequest<T>(endpoint: string, payload: ApiCriteriaPayload, signal?: AbortSignal): Promise<T> {
+  const response = await fetch(buildApiUrl(endpoint), {
+    method: 'POST',
+    body: JSON.stringify(payload),
+    signal,
+    headers: {
+      Accept: 'application/json,text/plain,*/*',
+      'Content-Type': 'text/plain;charset=UTF-8',
+    },
+  })
+
+  if (!response.ok) {
+    throw new LocalizedError(createMessage('errors.apiRequestFailed', { status: response.status }))
+  }
+
+  return (await response.json()) as T
+}
+
+export async function fetchSearchCount(
+  criteria: SearchCriteriaDraft,
+  options: { signal?: AbortSignal } = {},
+): Promise<CountResponse> {
+  const payload = toApiCriteria(criteria)
+
+  if (!payload) {
+    throw new LocalizedError(createMessage('errors.atLeastOneCriteria'))
+  }
+
+  return postSearchRequest<CountResponse>('/count', payload, options.signal)
+}
+
 export async function fetchSearchPage(
   criteria: SearchCriteriaDraft,
   options: { offset?: number; limit?: number; signal?: AbortSignal } = {},
@@ -118,19 +150,5 @@ export async function fetchSearchPage(
 
   const offset = options.offset ?? 0
   const limit = options.limit ?? 24
-  const response = await fetch(buildApiUrl(`/query?limit=${limit}&offset=${offset}`), {
-    method: 'POST',
-    body: JSON.stringify(payload),
-    signal: options.signal,
-    headers: {
-      Accept: 'application/json,text/plain,*/*',
-      'Content-Type': 'text/plain;charset=UTF-8',
-    },
-  })
-
-  if (!response.ok) {
-    throw new LocalizedError(createMessage('errors.apiRequestFailed', { status: response.status }))
-  }
-
-  return (await response.json()) as QueryResponse
+  return postSearchRequest<QueryResponse>(`/query?limit=${limit}&offset=${offset}`, payload, options.signal)
 }
