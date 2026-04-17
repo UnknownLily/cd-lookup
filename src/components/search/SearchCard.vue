@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import CoverSurface from './CoverSurface.vue'
 import TagActionMenu from './TagActionMenu.vue'
 import { getFieldLabel, type SearchResultItem, type SearchTag } from '../../types/search'
 
@@ -18,6 +19,7 @@ const { t } = useI18n()
 const cardRef = ref<HTMLElement | null>(null)
 const mobileExpanded = ref(false)
 const hasExpandableDetails = computed(() => props.item.detailSections.some((section) => section.tags.length > 0))
+const isDarkCover = ref(false)
 
 function toggleMobileExpanded(): void {
   if (typeof window === 'undefined') {
@@ -71,25 +73,6 @@ function splitMetaLine(line: string): { label: string; value: string } {
   }
 }
 
-const isDarkCover = ref(false)
-let toneAnalysisToken = 0
-
-watch(
-  () => props.item.coverUrl,
-  (coverUrl) => {
-    toneAnalysisToken += 1
-    const currentToken = toneAnalysisToken
-    isDarkCover.value = false
-
-    if (!coverUrl) {
-      return
-    }
-
-    void detectCoverTone(coverUrl, currentToken)
-  },
-  { immediate: true },
-)
-
 watch(
   () => props.item.id,
   () => {
@@ -109,79 +92,8 @@ onBeforeUnmount(() => {
   window.removeEventListener('search-card-collapse', handleCollapseRequest)
 })
 
-async function detectCoverTone(coverUrl: string, currentToken: number): Promise<void> {
-  try {
-    const image = await loadImageElement(coverUrl)
-    const luminance = sampleTopAreaLuminance(image)
-
-    if (currentToken !== toneAnalysisToken) {
-      return
-    }
-
-    isDarkCover.value = luminance < 118
-  } catch {
-    if (currentToken !== toneAnalysisToken) {
-      return
-    }
-
-    isDarkCover.value = false
-  }
-}
-
-function loadImageElement(src: string): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
-    const image = new Image()
-    image.crossOrigin = 'anonymous'
-    image.decoding = 'async'
-    image.onload = () => resolve(image)
-    image.onerror = () => reject(new Error('image-load-failed'))
-    image.src = src
-  })
-}
-
-function sampleTopAreaLuminance(image: HTMLImageElement): number {
-  const canvas = document.createElement('canvas')
-  const width = 32
-  const height = 32
-  const sampleHeight = 18
-
-  canvas.width = width
-  canvas.height = height
-
-  const context = canvas.getContext('2d', { willReadFrequently: true })
-  if (!context) {
-    return 255
-  }
-
-  context.drawImage(image, 0, 0, width, height)
-  const { data } = context.getImageData(0, 0, width, sampleHeight)
-
-  let weightedLuminance = 0
-  let totalWeight = 0
-
-  for (let y = 0; y < sampleHeight; y += 1) {
-    const verticalWeight = 1.2 - y / sampleHeight / 2
-
-    for (let x = 0; x < width; x += 1) {
-      const index = (y * width + x) * 4
-      const alpha = data[index + 3] / 255
-
-      if (alpha <= 0) {
-        continue
-      }
-
-      const red = data[index]
-      const green = data[index + 1]
-      const blue = data[index + 2]
-      const luminance = 0.2126 * red + 0.7152 * green + 0.0722 * blue
-      const weight = verticalWeight * alpha
-
-      weightedLuminance += luminance * weight
-      totalWeight += weight
-    }
-  }
-
-  return totalWeight > 0 ? weightedLuminance / totalWeight : 255
+function handleToneChange(value: boolean): void {
+  isDarkCover.value = value
 }
 </script>
 
@@ -205,10 +117,7 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
       @keyup.enter="toggleMobileExpanded"
       @keyup.space.prevent="toggleMobileExpanded"
     >
-      <v-img v-if="item.coverUrl" :src="item.coverUrl" :alt="item.title" class="cover-image" cover height="320" />
-      <div v-else class="cover-fallback">
-        <span>{{ t('app.noCover') }}</span>
-      </div>
+      <CoverSurface :src="item.coverUrl" :alt="item.title" variant="card" class="cover-surface-host" @tone-change="handleToneChange" />
     </div>
 
     <div class="card-body" aria-hidden="true"></div>
@@ -454,13 +363,13 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
   transition: opacity 220ms ease;
 }
 
-.cover-image {
+.cover-surface-host {
   position: relative;
   z-index: 1;
 }
 
-.cover-image :deep(.v-img__img),
-.cover-image :deep(.v-img__picture) {
+.cover-surface-host :deep(.cover-surface__image .v-img__img),
+.cover-surface-host :deep(.cover-surface__image .v-img__picture) {
   transition: filter 220ms ease, opacity 220ms ease, transform 220ms ease;
 }
 
@@ -492,10 +401,10 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
   opacity: 1;
 }
 
-.result-card:hover .cover-image :deep(.v-img__img),
-.result-card:focus-within .cover-image :deep(.v-img__img),
-.result-card:hover .cover-image :deep(.v-img__picture),
-.result-card:focus-within .cover-image :deep(.v-img__picture) {
+.result-card:hover .cover-surface-host :deep(.cover-surface__image .v-img__img),
+.result-card:focus-within .cover-surface-host :deep(.cover-surface__image .v-img__img),
+.result-card:hover .cover-surface-host :deep(.cover-surface__image .v-img__picture),
+.result-card:focus-within .cover-surface-host :deep(.cover-surface__image .v-img__picture) {
   -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 1) 64%, rgba(0, 0, 0, 0.92) 74%, rgba(0, 0, 0, 0.62) 86%, rgba(0, 0, 0, 0) 100%);
   mask-image: linear-gradient(180deg, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 1) 64%, rgba(0, 0, 0, 0.92) 74%, rgba(0, 0, 0, 0.62) 86%, rgba(0, 0, 0, 0) 100%);
 }
@@ -515,16 +424,6 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
   background: var(--card-image-wash-bg);
   -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.04) 8%, rgba(0, 0, 0, 0.15) 20%, rgba(0, 0, 0, 0.36) 36%, rgba(0, 0, 0, 0.68) 58%, rgba(0, 0, 0, 0.92) 80%, rgba(0, 0, 0, 1) 100%);
   mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.04) 8%, rgba(0, 0, 0, 0.15) 20%, rgba(0, 0, 0, 0.36) 36%, rgba(0, 0, 0, 0.68) 58%, rgba(0, 0, 0, 0.92) 80%, rgba(0, 0, 0, 1) 100%);
-}
-
-.cover-fallback {
-  height: 320px;
-  display: grid;
-  place-items: center;
-  color: rgba(31, 45, 51, 0.55);
-  background:
-    radial-gradient(circle at top, rgba(var(--v-theme-primary), 0.3), transparent 40%),
-    linear-gradient(135deg, rgba(var(--v-theme-accent), 0.14), rgba(var(--v-theme-primary), 0.1));
 }
 
 .card-body {
@@ -756,17 +655,12 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
     box-shadow: none;
   }
 
-  .cover-image,
-  .cover-fallback {
-    height: 216px !important;
-  }
-
   .card-cover {
     background: none;
   }
 
-  .cover-image :deep(.v-img__img),
-  .cover-image :deep(.v-img__picture) {
+  .cover-surface-host :deep(.cover-surface__image .v-img__img),
+  .cover-surface-host :deep(.cover-surface__image .v-img__picture) {
     transition: none;
     -webkit-mask-image: none !important;
     mask-image: none !important;
@@ -974,11 +868,6 @@ function sampleTopAreaLuminance(image: HTMLImageElement): number {
 }
 
 @media (max-width: 420px) {
-  .cover-image,
-  .cover-fallback {
-    height: 180px !important;
-  }
-
   .result-card {
     --mobile-card-expanded-max-height: 100%;
   }
