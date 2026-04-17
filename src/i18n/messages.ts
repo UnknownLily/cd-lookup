@@ -306,9 +306,9 @@ export const messages = {
     filters: {
       panelTitle: 'Filter Panel', panelDescription: 'Adjust conditions and then click Apply Filters', selectedCount: '{count} selected',
       groups: {
-        timeline: { title: 'Timeline & Duration', description: 'Founded year, release year, duration' },
+        timeline: { title: 'Time & Duration', description: 'Founded year, release year, duration' },
         publishing: { title: 'Release & Production', description: 'Event, circle, cover character' },
-        taxonomy: { title: 'Classification', description: 'Region, work type, circle status, property, rating' },
+        taxonomy: { title: 'Classification', description: 'Region, work type, circle status, release type, rating' },
         trackMeta: { title: 'Track Metadata', description: 'Style, original track, source work, original / non-Touhou flags' },
         trackCredits: { title: 'Track Credits', description: 'Arrange, lyric, compose, vocal, script, dub, performance' },
       },
@@ -318,13 +318,13 @@ export const messages = {
       options: {
         region: { 日本: 'Japan', 中国: 'China', 台湾: 'Taiwan', 香港: 'Hong Kong', 韩国: 'South Korea', 美国: 'United States', 英国: 'United Kingdom', 德国: 'Germany', 加拿大: 'Canada' },
         work: { 同人音乐: 'Doujin Music', 同人游戏: 'Doujin Game', 同人志: 'Doujinshi', 同人动画: 'Doujin Animation', 周边: 'Merchandise', 其他: 'Other' },
-        state: { 活动: 'Active', 休止: 'Hiatus', 解散: 'Disbanded' },
-        property: { 单曲: 'Single', Demo: 'Demo', 合作: 'Collaboration', 精选集: 'Best Of', B面: 'B-Side', 盒装: 'Box Set', Live: 'Live', 混音集: 'Remix Album', 原声集: 'Soundtrack', 印象集: 'Image Album' },
+        state: { 活动: 'Active', 休止: 'On Hiatus', 解散: 'Disbanded' },
+        property: { 单曲: 'Single', Demo: 'Demo', 合作: 'Collaboration', 精选集: 'Best Of', B面: 'B-Side', 盒装: 'Box Set', Live: 'Live', 混音集: 'Remix Album', 原声集: 'Soundtrack', 印象集: 'Touhou-style' },
         rate: { R18: 'R18', R15: 'R15', 一般向: 'General Audience' },
         noth: { 非东方: 'Non-Touhou' }, original: { 原创: 'Original' },
       },
     },
-    fields: { establish: 'Founded Year', year: 'Release Year', time: 'Duration', ogmusicno: 'Original Track Count', ogworkno: 'Source Work Count', event: 'Event', circle: 'Circle', coverchar: 'Cover Character', region: 'Region', work: 'Work Type', state: 'Circle Status', property: 'Property', rate: 'Rating', only: 'Restricted Condition', style: 'Style', ogmusic: 'Original Track', ogwork: 'Source Work', noth: 'Non-Touhou Track', original: 'Original Track', arrange: 'Arrangement', lyric: 'Lyrics', compose: 'Composition', vocal: 'Vocal', script: 'Script', dub: 'Voice', perform: 'Performance', official: 'Official', shop: 'Shop', cover: 'Cover' },
+    fields: { establish: 'Founded Year', year: 'Release Year', time: 'Duration', ogmusicno: 'Original Track Count', ogworkno: 'Source Work Count', event: 'Event', circle: 'Circle', coverchar: 'Cover Character', region: 'Region', work: 'Work Type', state: 'Circle Status', property: 'Release Type', rate: 'Rating', only: 'Restricted Condition', style: 'Style', ogmusic: 'Original Track', ogwork: 'Source Work', noth: 'Non-Touhou Track', original: 'Original Track', arrange: 'Arrangement', lyric: 'Lyrics', compose: 'Composition', vocal: 'Vocal', script: 'Script', dub: 'Voice', perform: 'Performance', official: 'Official', shop: 'Shop', cover: 'Cover' },
     results: { panelTitle: 'Results', panelDescription: 'Cards are the default layout, and you can switch to a list view.', viewMode: 'Layout', viewCard: 'Card layout', viewList: 'List layout', idleTitle: 'Set filters before searching', idleText: 'The backend can be slow. Narrow the scope with year, circle, work type, and similar filters before applying.', errorTitle: 'Request failed', errorText: 'The backend did not return usable results right now. Try again later or narrow the filters.', emptyTitle: 'No matching results', emptyText: 'Try widening the year range, removing some tags, or using a different keyword combination.' },
     tagInput: { fallbackHint: 'You can type directly or choose from suggestions.', loading: 'Searching matching tags…', localFallback: 'Local candidates', remoteReady: 'Remote suggestions available', remoteOnly: 'Remote suggestions', mixed: 'Remote + local matches', localOnly: 'Local matches', localFallbackBadge: 'Local fallback', noResult: 'No matching suggestion found. You can still keep the tag by typing it directly.', remoteUnavailable: 'Remote suggestions are unavailable. Showing local matches only.', fallbackStatus: 'Supports both remote suggestions and manual input.', unavailable: 'Suggestion API is unavailable. Fell back to local search.', panelTitle: 'Tag Search', panelText: 'After typing a keyword, the input searches locally first and fetches remote suggestions when available.' },
     keyword: { exactResolved: 'Recognized “{keyword}” as {fieldLabel}: {value}', looseResolved: 'Expanded “{keyword}” to {fieldLabel}: {value}', ambiguousFields: 'The keyword “{keyword}” matches multiple fields: {fields}. Candidates: {candidates}. Choose one from the suggestions or add it directly in the filter panel.', ambiguousCandidates: 'The keyword “{keyword}” has multiple candidate tags: {candidates}. Choose one from the suggestions or use the tag input in the filter panel.', unrecognized: 'The keyword “{keyword}” was not recognized as a filterable tag. Enter a circle, event, original track, source work, or contributor name, or pick it from the filter panel.' },
